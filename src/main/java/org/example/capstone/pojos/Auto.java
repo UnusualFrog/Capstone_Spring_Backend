@@ -21,8 +21,8 @@ public class Auto {
      * Many Autos can be associated with one User.
      */
     @ManyToOne
-    @JoinColumn(name="user_id")
-    private User user;      //User can have many homes - this will maintain the relationship
+    @JoinColumn(name="customer_id")
+    private Customer customer;      //Customers can have many autos - this will maintain the relationship
 
     /**
      * Gets the ID of the auto.
@@ -92,16 +92,16 @@ public class Auto {
      * Gets the user associated with this auto.
      * @return the user who owns the auto
      */
-    public User getUser() {
-        return user;
+    public User getCustomer() {
+        return customer;
     }
 
     /**
      * Sets the user associated with this auto.
-     * @param user the user to associate
+     * @param customer the user to associate
      */
-    public void setUser(User user) {
-        this.user = user;
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 }
 
