@@ -22,11 +22,7 @@ public class Auto {
      */
     @ManyToOne
     @JoinColumn(name="customer_id")
-<<<<<<< HEAD
     private Customer customer;      //User can have many homes - this will maintain the relationship
-=======
-    private Customer customer;      //Customers can have many autos - this will maintain the relationship
->>>>>>> b3e44967e1204a57fac4f93efba5bed2f070e925
 
     /**
      * Gets the ID of the auto.
