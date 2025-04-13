@@ -1,8 +1,6 @@
 package org.example.capstone.pojos;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
@@ -16,4 +14,35 @@ public class HomePolicy {
     private LocalDate endDate;
     private double premium;
     private int liabilityLimit;
+    @ManyToOne
+    @JoinColumn(name = "home_id")
+    private Home home;
+
+    public int getId() {
+        return id;
+    }
+
+    public LocalDate getEffectiveDate() {
+        return effectiveDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public double getPremium() {
+        return premium;
+    }
+
+    public int getLiabilityLimit() {
+        return liabilityLimit;
+    }
+
+    public Home getHome() {
+        return home;
+    }
 }

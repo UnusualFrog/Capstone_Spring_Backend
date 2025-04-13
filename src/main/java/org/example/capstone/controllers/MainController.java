@@ -1,10 +1,9 @@
 package org.example.capstone.controllers;
 
-import org.example.capstone.dataaccess.HomeRepository;
-import org.example.capstone.dataaccess.CustomerRepository;
-import org.example.capstone.dataaccess.AutoRepository;
+import org.example.capstone.dataaccess.*;
 import org.example.capstone.pojos.*;
 import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +23,11 @@ public class MainController {
     @Autowired private CustomerRepository customerRepository;
     @Autowired private HomeRepository homeRepository;
     @Autowired private AutoRepository autoRepository;
+    @Autowired private HomeQuoteRepository homeQuoteRepository;
+    @Autowired private HomePolicyRepository homePolicyRepository;
+    @Autowired private AutoQuoteRepository autoQuoteRepository;
+    @Autowired private AutoPolicyRepository autoPolicyRepository;
+//    @Autowired private PasswordEncoder passwordEncoder;
 
     /* *
      *  Customer METHODS
@@ -60,13 +64,61 @@ public class MainController {
     public @ResponseBody Customer createCustomer(
             @RequestParam String name,
             @RequestParam Integer age,
-            @RequestParam Integer accidentCount) {
+            @RequestParam Integer accidentCount,
+            @RequestParam String email,
+            @RequestParam String username,
+            @RequestParam String password
+            ) {
         Customer customer = new Customer();
         customer.setName(name);
         customer.setAge(age);
         customer.setAccidentCount(accidentCount);
+        customer.setEmail(email);
+        customer.setUsername(username);
+        customer.setPassword(password);
         return customerRepository.save(customer);
     }
+
+    /**
+     * Registers a new customer account, and encodes the password.
+     *
+     * @param customer Customer data in the request body
+     * @return Success or error message
+     */
+//    @PostMapping("/register")
+//    public @ResponseBody String registerCustomer(@RequestBody Customer customer) {
+//        if (customerRepository.existsByUsername(customer.getUsername())) {
+//            return "Username already exists. Please choose a new username.";
+//        }
+//        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
+//        customerRepository.save(customer);
+//        return "Customer registration successful!";
+//    }
+//
+//    /**
+//     * Handles login requests by validating customer credentials
+//     * This method takes a username and password in the request body, looks up the corresponding
+//     * customer record, and checks if the provided password matches the stored (encoded) password.
+//     *
+//     * @param loginRequest A request object containing the username and password entered by the user
+//     * @return A string message indicating the result of the login attempt:
+//     *         - "Login successful! Welcome, [name]" if credentials are valid
+//     *         - "Incorrect password." if the username exists but the password does not match
+//     *         - "User not found." if no customer exists with the provided username
+//     */
+//    @PostMapping("/login")
+//    public @ResponseBody String login(@RequestBody LoginRequest loginRequest) {
+//        Customer customer = customerRepository.findByUsername(loginRequest.getUsername());
+//
+//        if (customer == null) {
+//            return "User not found.";
+//        }
+//        if (passwordEncoder.matches(loginRequest.getPassword(), customer.getPassword())) {
+//            return "Login successful! Welcome, " + customer.getName();
+//        } else {
+//            return "Incorrect password.";
+//        }
+//    }
 
     /**
      * Deletes a customer from the database by their unique identifier.
@@ -96,13 +148,19 @@ public class MainController {
             @PathVariable("id") Long customerId,
             @RequestParam String name,
             @RequestParam Integer age,
-            @RequestParam Integer accidentCount){
+            @RequestParam Integer accidentCount,
+            @RequestParam String email,
+            @RequestParam String username,
+            @RequestParam String password){
         if (customerRepository.existsById(customerId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
             if(customer.isPresent()){
                 customer.get().setName(name);
                 customer.get().setAge(age);
                 customer.get().setAccidentCount(accidentCount);
+                customer.get().setEmail(email);
+                customer.get().setUsername(username);
+                customer.get().setPassword(password);
                 customerRepository.save(customer.get());
             }
             return "Customer with ID " + customerId + " updated successfully.";
@@ -316,4 +374,25 @@ public class MainController {
             return "Auto with ID " + autoId + " not found.";
         }
     }
+
+    /* *
+     *  AUTO QUOTE METHODS
+     * */
+    @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ID)
+    public @ResponseBody Optional<AutoQuote> getAutoQuoteById(@PathVariable("id") Long quoteID) {
+        return autoQuoteRepository.findById(quoteID);
+    }
+
+    @PostMapping(path = RESTNouns.AUTO_QUOTE)
+    public @ResponseBody AutoQuote createAutoQuote(
+            @RequestParam Integer customerAge,
+            @RequestParam Integer vehicleAge,
+            @RequestParam Integer X
+    ) {
+        AutoQuote quote = new AutoQuote();
+//        quote.calculateX(name);
+
+        return autoQuoteRepository.save(quote);
+    }
+
 }

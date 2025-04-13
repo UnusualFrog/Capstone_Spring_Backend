@@ -1,6 +1,6 @@
 package org.example.capstone.testers;
 
-import org.example.capstone.pojos.OLD_User;
+import org.example.capstone.unused.OLD_User;
 
 public class UserTester {
 

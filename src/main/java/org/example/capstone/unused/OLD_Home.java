@@ -1,4 +1,4 @@
-package org.example.capstone.pojos;
+package org.example.capstone.unused;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -9,7 +9,6 @@ import java.time.LocalDate;
  * Represents a Home entity for the REST controller.
  * This entity demonstrates relationships in ORM, enum fields, and date fields.
  */
-@Entity
 public class OLD_Home {
 
     /**

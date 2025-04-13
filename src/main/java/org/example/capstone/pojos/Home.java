@@ -60,7 +60,7 @@ public class Home {
         this.location = location;
     }
 
-    public User getCustomer() {
+    public Customer getCustomer() {
         return customer;
     }
 

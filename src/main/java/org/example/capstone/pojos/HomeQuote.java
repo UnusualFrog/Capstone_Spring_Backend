@@ -1,9 +1,6 @@
 package org.example.capstone.pojos;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
@@ -14,48 +11,38 @@ public class HomeQuote {
     @GeneratedValue
     private int id;
     private LocalDate generationDate;
-    private LocalDate endDate;
+    private boolean active;
     private double premium;
-    @OneToOne
+    private int liabilityLimit;
+    @ManyToOne
+    @JoinColumn(name = "home_id")
     private Home home;
 
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public LocalDate getGenerationDate() {
         return generationDate;
     }
 
-    public void setGenerationDate(LocalDate generationDate) {
-        this.generationDate = generationDate;
+    public boolean getActive() {
+        return active;
     }
 
-    public LocalDate getEndDate() {
-        return endDate;
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
+    public int getLiabilityLimit() {
+        return liabilityLimit;
     }
 
     public double getPremium() {
         return premium;
     }
 
-    public void setPremium(double premium) {
-        this.premium = premium;
-    }
-
     public Home getHome() {
         return home;
-    }
-
-    public void setHome(Home home) {
-        this.home = home;
     }
 }
