@@ -9,7 +9,7 @@ import jakarta.persistence.Id;
 /**
  * User Class with annotations for Hibernate ORM
  */
-@Entity // This tells Hibernate to make a table out of this class
+//@Entity // This tells Hibernate to make a table out of this class
 public abstract class User {
 
     @Id

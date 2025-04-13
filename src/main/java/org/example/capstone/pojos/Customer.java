@@ -12,6 +12,32 @@ public class Customer extends User {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer id;
     private int age;
-    private String accidentCount;
+    private Integer accidentCount;
     //private List insurableItems;
+
+    @Override
+    public Integer getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public Integer getAccidentCount() {
+        return accidentCount;
+    }
+
+    public void setAccidentCount(Integer accidentCount) {
+        this.accidentCount = accidentCount;
+    }
 }

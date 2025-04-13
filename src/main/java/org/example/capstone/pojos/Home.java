@@ -17,17 +17,14 @@ public class Home {
     private Integer id;
     @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate dateBuilt;
-    private int value;
+    private double homeValue;
     @Enumerated(EnumType.ORDINAL)
     private HeatingType heatingType;
     private Location location;
-    private int yearBuilt;
-    private String dwellingType;
-    private double homeValue;
 
     @ManyToOne
-    @JoinColumn(name="user_id")
-    private User user;      //User can have many homes - this will maintain the relationship
+    @JoinColumn(name="customer_id")
+    private Customer customer;      //User can have many homes - this will maintain the relationship
 
     //TODO Document Getters and Setters
 
@@ -47,14 +44,6 @@ public class Home {
         this.dateBuilt = yearBuilt;
     }
 
-    public int getValue() {
-        return value;
-    }
-
-    public void setValue(int value) {
-        this.value = value;
-    }
-
     public HeatingType getHeatingType() {
         return heatingType;
     }
@@ -71,28 +60,12 @@ public class Home {
         this.location = location;
     }
 
-    public User getUser() {
-        return user;
+    public User getCustomer() {
+        return customer;
     }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public int getYearBuilt() {
-        return yearBuilt;
-    }
-
-    public void setYearBuilt(int yearBuilt) {
-        this.yearBuilt = yearBuilt;
-    }
-
-    public String getDwellingType() {
-        return dwellingType;
-    }
-
-    public void setDwellingType(String dwellingType) {
-        this.dwellingType = dwellingType;
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 
     public double getHomeValue() {

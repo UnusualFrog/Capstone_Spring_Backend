@@ -14,5 +14,5 @@ public interface AutoRepository extends CrudRepository<Auto, Long> {
      * @param customerId
      * @return
      */
-    Iterable<Auto> getAllByUserId(Long customerId);
+    Iterable<Auto> getAllByCustomerId(Long customerId);
 }

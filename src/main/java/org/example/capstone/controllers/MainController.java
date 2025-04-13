@@ -54,15 +54,17 @@ public class MainController {
      * Creates a new customer in the database.
      *
      * @param name The name of the customer to create
-     * @param email The email address of the user to create
      * @return The newly created User entity
      */
     @PostMapping(path = RESTNouns.CUSTOMER)
-    public @ResponseBody Customer createUser(
-            @RequestParam String name, @RequestParam String email) {
+    public @ResponseBody Customer createCustomer(
+            @RequestParam String name,
+            @RequestParam Integer age,
+            @RequestParam Integer accidentCount) {
         Customer customer = new Customer();
         customer.setName(name);
-        customer.setEmail(email);
+        customer.setAge(age);
+        customer.setAccidentCount(accidentCount);
         return customerRepository.save(customer);
     }
 
@@ -87,22 +89,25 @@ public class MainController {
      *
      * @param customerId The unique identifier of the user to update
      * @param name The new name for the user
-     * @param email The new email address for the user
      * @return A string message indicating the result of the update operation
      */
     @PutMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID)
     public @ResponseBody String updateUser(
-            @PathVariable("id") Long customerId, @RequestParam String name, @RequestParam String email){
+            @PathVariable("id") Long customerId,
+            @RequestParam String name,
+            @RequestParam Integer age,
+            @RequestParam Integer accidentCount){
         if (customerRepository.existsById(customerId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
             if(customer.isPresent()){
                 customer.get().setName(name);
-                customer.get().setEmail(email);
+                customer.get().setAge(age);
+                customer.get().setAccidentCount(accidentCount);
                 customerRepository.save(customer.get());
             }
-            return "User with ID " + customerId + " updated successfully.";
+            return "Customer with ID " + customerId + " updated successfully.";
         } else {
-            return "User with ID " + customerId + " not found.";
+            return "Customer with ID " + customerId + " not found.";
         }
     }
 
@@ -137,21 +142,24 @@ public class MainController {
      *
      * @param customerId The unique identifier of the user for whom the home is being created
      * @param dateBuilt The date when the home was built
-     * @param value The monetary value of the home
+     * @param homeValue The monetary value of the home
      * @return The newly created Home entity, or null if the user does not exist
      */
     @PostMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID + RESTNouns.HOME)
     public @ResponseBody Home createHomeByCustomer(
             @PathVariable("id") Long customerId,
-            @RequestParam LocalDate dateBuilt, @RequestParam int value, @RequestParam Home.HeatingType heatingType, @RequestParam Home.Location location) {
+            @RequestParam LocalDate dateBuilt,
+            @RequestParam int homeValue,
+            @RequestParam Home.HeatingType heatingType,
+            @RequestParam Home.Location location) {
         Home home = null;
         if (customerRepository.existsById(customerId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
             if (customer.isPresent()) {
                 home = new Home();
-                home.setValue(value);
+                home.setHomeValue(homeValue);
                 home.setDateBuilt(dateBuilt);
-                home.setUser(customer.get());
+                home.setCustomer(customer.get());
                 home.setHeatingType(heatingType);
                 home.setLocation(location);
                 homeRepository.save(home);
@@ -167,19 +175,22 @@ public class MainController {
      * @param customerId The unique identifier of the user who owns the home
      * @param homeId The unique identifier of the home to be updated
      * @param dateBuilt The new date when the home was built
-     * @param value The new monetary value of the home
+     * @param homeValue The new monetary value of the home
      * @return A string message indicating the result of the update operation
      */
     @PutMapping(path = RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID + RESTNouns.HOME + RESTNouns.HOME_ID)
     public @ResponseBody String updateHomeByCustomer(
             @PathVariable("customer_id") Long customerId, @PathVariable("home_id") Long homeId,
-            @RequestParam LocalDate dateBuilt, @RequestParam int value, @RequestParam Home.HeatingType heatingType, @RequestParam Home.Location location){
+            @RequestParam LocalDate dateBuilt,
+            @RequestParam int homeValue,
+            @RequestParam Home.HeatingType heatingType,
+            @RequestParam Home.Location location){
         if (customerRepository.existsById(customerId) && homeRepository.existsById(homeId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
             Optional<Home> home = homeRepository.findById(homeId);
             if(customer.isPresent() && home.isPresent()){
                 home.get().setDateBuilt(dateBuilt);
-                home.get().setValue(value);
+                home.get().setHomeValue(homeValue);
                 home.get().setHeatingType(heatingType);
                 home.get().setLocation(location);
 
@@ -195,14 +206,14 @@ public class MainController {
     /**
      * Deletes a specific home associated with a user.
      *
-     * @param userId The unique identifier of the user who owns the home
+     * @param customerId The unique identifier of the user who owns the home
      * @param homeId The unique identifier of the home to be deleted
      * @return A string message indicating the result of the deletion operation
      */
     @DeleteMapping(path = RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID + RESTNouns.HOME + RESTNouns.HOME_ID)
     public @ResponseBody String deleteHomeByCustomer(
-            @PathVariable("customer_id") Long userId, @PathVariable("home_id") Long homeId) {
-        if (customerRepository.existsById(userId) && homeRepository.existsById(homeId)) {
+            @PathVariable("customer_id") Long customerId, @PathVariable("home_id") Long homeId) {
+        if (customerRepository.existsById(customerId) && homeRepository.existsById(homeId)) {
             homeRepository.deleteById(homeId);
             return "Home with ID " + homeId + " deleted successfully.";
         } else {
@@ -227,7 +238,7 @@ public class MainController {
         if (customerRepository.existsById(customerId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
             if(customer.isPresent()){
-                autos = autoRepository.getAllByUserId(customerId);
+                autos = autoRepository.getAllByCustomerId(customerId);
             }
         }
         return autos;
@@ -252,7 +263,7 @@ public class MainController {
                 auto = new Auto();
 //                auto.setValue(value);
 //                auto.setDateBuilt(dateBuilt);
-                auto.setUser(customer.get());
+                auto.setCustomer(customer.get());
                 autoRepository.save(auto);
             }
         }
