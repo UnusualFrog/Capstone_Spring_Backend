@@ -11,7 +11,7 @@ public class AutoQuote {
     @GeneratedValue
     private int id;
     private LocalDate generationDate;
-    private boolean active;
+    private boolean active = true;
     private double premium;
     private double taxRate;
     @ManyToOne
@@ -36,6 +36,26 @@ public class AutoQuote {
 
     public double getPremium() {
         return premium;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setGenerationDate(LocalDate generationDate) {
+        this.generationDate = generationDate;
+    }
+
+    public void setPremium(double premium) {
+        this.premium = premium;
+    }
+
+    public void setTaxRate(double taxRate) {
+        this.taxRate = taxRate;
+    }
+
+    public void setAuto(Auto auto) {
+        this.auto = auto;
     }
 
     public double getTaxRate() {

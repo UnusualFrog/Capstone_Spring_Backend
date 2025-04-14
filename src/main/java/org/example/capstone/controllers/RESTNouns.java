@@ -18,4 +18,7 @@ public class RESTNouns {
     public static final String HOME_ID = "/{home_id}";
     public static final String CUSTOMER_ID = "/{customer_id}";
     public static final String AUTO_ID = "/{auto_id}";
+    public static final String QUOTE_ID = "/{quote_id}";
+    public static final String POLICY_ID = "/{policy_id}";
+
 }

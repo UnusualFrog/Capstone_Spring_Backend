@@ -13,6 +13,7 @@ public class AutoPolicy {
     private LocalDate endDate;
     private double premium;
     private double taxRate;
+    private boolean active = true;
     @ManyToOne
     @JoinColumn(name = "auto_id")
     private Auto auto;
@@ -44,6 +45,14 @@ public class AutoPolicy {
 
     public double getTaxRate() {
         return taxRate;
+    }
+
+    public boolean getActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public int getCustId() {

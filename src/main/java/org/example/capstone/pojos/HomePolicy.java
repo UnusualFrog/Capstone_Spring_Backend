@@ -15,6 +15,7 @@ public class HomePolicy {
     private double premium;
     private int liabilityLimit;
     private double taxRate;
+    private boolean active = true;
     @ManyToOne
     @JoinColumn(name = "home_id")
     private Home home;
@@ -46,6 +47,14 @@ public class HomePolicy {
 
     public double getTaxRate() {
         return taxRate;
+    }
+
+    public boolean getActive() {
+        return active; 
+    }
+    
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public Home getHome() {

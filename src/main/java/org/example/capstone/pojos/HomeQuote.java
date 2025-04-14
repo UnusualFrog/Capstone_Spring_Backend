@@ -11,7 +11,7 @@ public class HomeQuote {
     @GeneratedValue
     private int id;
     private LocalDate generationDate;
-    private boolean active;
+    private boolean active = true;
     private double premium;
     private int liabilityLimit;
     private double taxRate;
