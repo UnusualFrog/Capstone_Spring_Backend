@@ -6,15 +6,18 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+import java.time.LocalDate;
+
 @Entity
 public class Customer {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer id;
-    private int age;
+    private LocalDate birthday;
     private Integer accidentCount;
-    private String name;
+    private String firstName;
+    private String lastName;
     private String email;
     private String username;
     // @JsonIgnore //hides from json / removable if necessary
@@ -28,12 +31,12 @@ public class Customer {
         this.id = id;
     }
 
-    public int getAge() {
-        return age;
+    public LocalDate getBirthday() {
+        return birthday;
     }
 
-    public void setAge(int age) {
-        this.age = age;
+    public void setBirthday(LocalDate birthday) {
+        this.birthday = birthday;
     }
 
     public Integer getAccidentCount() {
@@ -49,15 +52,23 @@ public class Customer {
      * @return name
      */
     public String getName() {
-        return name;
+        return firstName + " " + lastName;
     }
 
-    /**
-     * Set the name
-     * @param name name
-     */
-    public void setName(String name) {
-        this.name = name;
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     /**

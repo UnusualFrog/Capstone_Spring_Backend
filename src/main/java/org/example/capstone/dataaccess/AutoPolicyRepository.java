@@ -14,5 +14,6 @@ public interface AutoPolicyRepository extends CrudRepository<AutoPolicy, Long> {
      * @param autoPolicyID
      * @return
      */
-    Iterable<HomeQuote> getAutoPoliciesById(Long autoPolicyID);
+    Iterable<AutoPolicy> getAutoPoliciesById(Long autoPolicyID);
+    Iterable<AutoPolicy> getAutoPolicyByCustId(Long customerId);
 }

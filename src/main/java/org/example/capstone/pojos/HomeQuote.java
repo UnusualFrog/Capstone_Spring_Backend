@@ -47,6 +47,26 @@ public class HomeQuote {
         return taxRate;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setGenerationDate(LocalDate generationDate) {
+        this.generationDate = generationDate;
+    }
+
+    public void setPremium(double premium) {
+        this.premium = premium;
+    }
+
+    public void setTaxRate(double taxRate) {
+        this.taxRate = taxRate;
+    }
+
+    public void setLiabilityLimit(int liabilityLimit) {
+        this.liabilityLimit = liabilityLimit;
+    }
+
     public Home getHome() {
         return home;
     }

@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -56,8 +57,7 @@ public class MainController {
     /**
      * Registers a new customer account. The password is securely hashed before being saved.
      *
-     * @param name           The full name of the customer.
-     * @param age            The customer's age.
+     * @param birthday       The customer's birthday.
      * @param accidentCount  The number of past accidents associated with the customer.
      * @param email          The customer's email address.
      * @param username       The desired username for the customer account.
@@ -66,8 +66,9 @@ public class MainController {
      */
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> registerCustomer(
-            @RequestParam String name,
-            @RequestParam Integer age,
+            @RequestParam String firstName,
+            @RequestParam String lastName,
+            @RequestParam LocalDate birthday,
             @RequestParam Integer accidentCount,
             @RequestParam String email,
             @RequestParam String username,
@@ -82,8 +83,9 @@ public class MainController {
         }
 
         Customer customer = new Customer();
-        customer.setName(name);
-        customer.setAge(age);
+        customer.setFirstName(firstName);
+        customer.setLastName(lastName);
+        customer.setBirthday(birthday);
         customer.setAccidentCount(accidentCount);
         customer.setEmail(email);
         customer.setUsername(username);
@@ -137,21 +139,22 @@ public class MainController {
     /**
      * Creates a new customer in the database.
      *
-     * @param name The name of the customer to create
      * @return The newly created User entity
      */
     @PostMapping(path = RESTNouns.CUSTOMER)
     public @ResponseBody Customer createCustomer(
-            @RequestParam String name,
-            @RequestParam Integer age,
+            @RequestParam String firstName,
+            @RequestParam String lastName,
+            @RequestParam LocalDate birthday,
             @RequestParam Integer accidentCount,
             @RequestParam String email,
             @RequestParam String username,
             @RequestParam String password
             ) {
         Customer customer = new Customer();
-        customer.setName(name);
-        customer.setAge(age);
+        customer.setFirstName(firstName);
+        customer.setLastName(lastName);
+        customer.setBirthday(birthday);
         customer.setAccidentCount(accidentCount);
         customer.setEmail(email);
         customer.setUsername(username);
@@ -179,14 +182,14 @@ public class MainController {
      * Updates an existing customer's information.
      *
      * @param customerId The unique identifier of the user to update
-     * @param name The new name for the user
      * @return A string message indicating the result of the update operation
      */
     @PutMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID)
     public @ResponseBody String updateCustomer(
             @PathVariable("id") Long customerId,
-            @RequestParam String name,
-            @RequestParam Integer age,
+            @RequestParam String firstName,
+            @RequestParam String lastName,
+            @RequestParam LocalDate birthday,
             @RequestParam Integer accidentCount,
             @RequestParam String email,
             @RequestParam String username,
@@ -194,8 +197,9 @@ public class MainController {
         if (customerRepository.existsById(customerId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
             if(customer.isPresent()){
-                customer.get().setName(name);
-                customer.get().setAge(age);
+                customer.get().setFirstName(firstName);
+                customer.get().setLastName(lastName);
+                customer.get().setBirthday(birthday);
                 customer.get().setAccidentCount(accidentCount);
                 customer.get().setEmail(email);
                 customer.get().setUsername(username);
@@ -434,29 +438,82 @@ public class MainController {
     /* *
      *  HOME QUOTE METHODS
      * */
+
+    /**
+     * Retrieves all home quotes from the database.
+     *
+     * @return An iterable collection of all HomeQuote entities
+     */
+    @GetMapping(path = RESTNouns.HOME_QUOTE)
+    public @ResponseBody Iterable<HomeQuote> getAllHomeQuotes() {
+        return homeQuoteRepository.findAll();
+    }
+
     @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ID)
     public @ResponseBody Optional<HomeQuote> getHomeQuoteById(@PathVariable("id") Long quoteID) {
         return homeQuoteRepository.findById(quoteID);
     }
 
-    @PostMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.CUSTOMER_ID)
-    public @ResponseBody HomeQuote createHomeQuoteByCustomer(
+    @PostMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.HOME_ID)
+    public @ResponseBody String createHomeQuoteByCustomer(
             @PathVariable("customer_id") Long customerId,
-            @RequestParam LocalDate dateBuilt,
-            @RequestParam int value) {
-        HomeQuote homeQuote = null;
-        if (customerRepository.existsById(customerId)) {
-            Optional<Customer> customer = customerRepository.findById(customerId);
-            if (customer.isPresent()) {
-                homeQuote = new HomeQuote();
-//                auto.setValue(value);
-//                auto.setDateBuilt(dateBuilt);
-//                auto.setCustomer(customer.get());
-                homeQuoteRepository.save(homeQuote);
+            @PathVariable("home_id") Long homeId,
+            @RequestParam int liability
+    ) {
+        Optional<Home> home = homeRepository.findById(homeId);
+        Optional<Customer> customer = customerRepository.findById(customerId);
+        if (home.isPresent() && customer.isPresent()) {
+            LocalDate today = LocalDate.now();
+            int homeAge = Period.between(home.get().getDateBuilt(), today).getYears();
+            double factor = 1;
+            if (liability == 2000000) {
+                factor *= 1.25;
             }
+            if (homeAge > 50) {
+                factor *= 1.5;
+            } else if (homeAge > 25) {
+                factor *= 1.25;
+            }
+            if (home.get().getHeatingType() == Home.HeatingType.OIL_HEATING) {
+                factor *= 2;
+            } else if (home.get().getHeatingType() == Home.HeatingType.WOOD_HEATING) {
+                factor *= 1.25;
+            }
+            if (home.get().getLocation() == Home.Location.RURAL) {
+                factor *= 1.15;
+            }
+            if (autoPolicyRepository.getAutoPolicyByCustId(customerId).iterator().hasNext()) {
+                double factorAdjust = 1;
+                for (AutoPolicy policy : autoPolicyRepository.getAutoPolicyByCustId(customerId)) {
+                    if (policy.getActive()) {
+                        factorAdjust = 0.9;
+                        break;
+                    }
+                }
+                factor *= factorAdjust;
+            }
+            double addPremium = (home.get().getHomeValue() > 250000) ? home.get().getHomeValue() * 0.002 : 0;
+            double premium = (500 + addPremium) * factor * (taxRate + 1);
+            HomeQuote quote = new HomeQuote();
+            quote.setPremium(premium);
+            quote.setGenerationDate(today);
+            quote.setLiabilityLimit(liability);
+            quote.setTaxRate(taxRate);
+            quote.setHome(home.get());
+        /* Calculation Info
+            Base: 500
+            Home Value: >250k = v*0.2; 0;
+            Liability: 2m = 1.25; 1
+            Home Age: >50 = 1.5; >25 = 1.25; 1
+            Heating: Oil = 2; Wood = 1.25; 1
+            Location: Rural = 1.15; Urban = 1
+            Discount: Active Auto = 0.9
+            (Base + Value Premium) * All Factors * Tax Rate
+         */
+            homeQuoteRepository.save(quote);
+            return "Quote Generated!";
         }
-
-        return homeQuote;
+        return "Customer or Home not present.";
     }
 
     @PutMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.QUOTE_ID)
@@ -499,6 +556,17 @@ public class MainController {
     /* *
      *  AUTO QUOTE METHODS
      * */
+
+    /**
+     * Retrieves all auto quotes from the database.
+     *
+     * @return An iterable collection of all AutoQuote entities
+     */
+    @GetMapping(path = RESTNouns.AUTO_QUOTE)
+    public @ResponseBody Iterable<AutoQuote> getAllAutoQuotes() {
+        return autoQuoteRepository.findAll();
+    }
+
     @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ID)
     public @ResponseBody Optional<AutoQuote> getAutoQuoteById(@PathVariable("id") Long quoteID) {
         return autoQuoteRepository.findById(quoteID);
@@ -528,8 +596,9 @@ public class MainController {
         Optional<Customer> customer = customerRepository.findById(customerId);
         if (auto.isPresent() && customer.isPresent()) {
             LocalDate today = LocalDate.now();
+            int age = Period.between(customer.get().getBirthday(), today).getYears();
             double factor = 1;
-            if (customer.get().getAge() < 25) {
+            if (age < 25) {
                 factor *= 2;
             }
             if (customer.get().getAccidentCount() > 1) {
@@ -547,11 +616,12 @@ public class MainController {
                 for (HomePolicy policy : homePolicyRepository.getHomePolicyByCustId(customerId)) {
                     if (policy.getActive()) {
                         factorAdjust = 0.9;
+                        break;
                     }
                 }
                 factor *= factorAdjust;
             }
-            double premium = 750 * factor * taxRate;
+            double premium = 750 * factor * (taxRate + 1);
             AutoQuote quote = new AutoQuote();
             quote.setGenerationDate(today);
             quote.setPremium(premium);
