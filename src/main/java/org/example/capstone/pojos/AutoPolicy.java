@@ -12,9 +12,11 @@ public class AutoPolicy {
     private LocalDate effectiveDate;
     private LocalDate endDate;
     private double premium;
+    private double taxRate;
     @ManyToOne
     @JoinColumn(name = "auto_id")
     private Auto auto;
+    private int custId;
 
     public int getId() {
         return id;
@@ -38,5 +40,13 @@ public class AutoPolicy {
 
     public Auto getAuto() {
         return auto;
+    }
+
+    public double getTaxRate() {
+        return taxRate;
+    }
+
+    public int getCustId() {
+        return custId;
     }
 }

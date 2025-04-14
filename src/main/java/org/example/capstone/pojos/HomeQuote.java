@@ -14,6 +14,7 @@ public class HomeQuote {
     private boolean active;
     private double premium;
     private int liabilityLimit;
+    private double taxRate;
     @ManyToOne
     @JoinColumn(name = "home_id")
     private Home home;
@@ -34,15 +35,23 @@ public class HomeQuote {
         this.active = active;
     }
 
-    public int getLiabilityLimit() {
-        return liabilityLimit;
-    }
-
     public double getPremium() {
         return premium;
     }
 
+    public int getLiabilityLimit() {
+        return liabilityLimit;
+    }
+
+    public double getTaxRate() {
+        return taxRate;
+    }
+
     public Home getHome() {
         return home;
+    }
+
+    public void setHome(Home home) {
+        this.home = home;
     }
 }

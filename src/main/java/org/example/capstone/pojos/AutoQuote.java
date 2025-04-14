@@ -13,6 +13,7 @@ public class AutoQuote {
     private LocalDate generationDate;
     private boolean active;
     private double premium;
+    private double taxRate;
     @ManyToOne
     @JoinColumn(name = "auto_id")
     private Auto auto;
@@ -35,6 +36,10 @@ public class AutoQuote {
 
     public double getPremium() {
         return premium;
+    }
+
+    public double getTaxRate() {
+        return taxRate;
     }
 
     public Auto getAuto() {

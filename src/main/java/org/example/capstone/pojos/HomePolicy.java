@@ -14,9 +14,11 @@ public class HomePolicy {
     private LocalDate endDate;
     private double premium;
     private int liabilityLimit;
+    private double taxRate;
     @ManyToOne
     @JoinColumn(name = "home_id")
     private Home home;
+    private int custId;
 
     public int getId() {
         return id;
@@ -42,7 +44,15 @@ public class HomePolicy {
         return liabilityLimit;
     }
 
+    public double getTaxRate() {
+        return taxRate;
+    }
+
     public Home getHome() {
         return home;
+    }
+
+    public int getCustId() {
+        return custId;
     }
 }

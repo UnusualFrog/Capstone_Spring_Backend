@@ -14,5 +14,6 @@ public interface HomePolicyRepository extends CrudRepository<HomePolicy, Long> {
      * @param homePolicyId
      * @return
      */
-    Iterable<HomeQuote> getHomePolicyById(Long homePolicyId);
+    Iterable<HomePolicy> getHomePolicyById(Long homePolicyId);
+    Iterable<HomePolicy> getHomePolicyByCustId(Long customerId);
 }

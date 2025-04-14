@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -21,13 +22,13 @@ public class MainController {
 
     //Wire the ORM
     @Autowired private CustomerRepository customerRepository;
+    @Autowired private EmployeeRepository employeeRepository;
     @Autowired private HomeRepository homeRepository;
     @Autowired private AutoRepository autoRepository;
     @Autowired private HomeQuoteRepository homeQuoteRepository;
     @Autowired private HomePolicyRepository homePolicyRepository;
     @Autowired private AutoQuoteRepository autoQuoteRepository;
     @Autowired private AutoPolicyRepository autoPolicyRepository;
-//    @Autowired private PasswordEncoder passwordEncoder;
 
     /* *
      *  Customer METHODS
@@ -80,47 +81,6 @@ public class MainController {
     }
 
     /**
-     * Registers a new customer account, and encodes the password.
-     *
-     * @param customer Customer data in the request body
-     * @return Success or error message
-     */
-//    @PostMapping("/register")
-//    public @ResponseBody String registerCustomer(@RequestBody Customer customer) {
-//        if (customerRepository.existsByUsername(customer.getUsername())) {
-//            return "Username already exists. Please choose a new username.";
-//        }
-//        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
-//        customerRepository.save(customer);
-//        return "Customer registration successful!";
-//    }
-//
-//    /**
-//     * Handles login requests by validating customer credentials
-//     * This method takes a username and password in the request body, looks up the corresponding
-//     * customer record, and checks if the provided password matches the stored (encoded) password.
-//     *
-//     * @param loginRequest A request object containing the username and password entered by the user
-//     * @return A string message indicating the result of the login attempt:
-//     *         - "Login successful! Welcome, [name]" if credentials are valid
-//     *         - "Incorrect password." if the username exists but the password does not match
-//     *         - "User not found." if no customer exists with the provided username
-//     */
-//    @PostMapping("/login")
-//    public @ResponseBody String login(@RequestBody LoginRequest loginRequest) {
-//        Customer customer = customerRepository.findByUsername(loginRequest.getUsername());
-//
-//        if (customer == null) {
-//            return "User not found.";
-//        }
-//        if (passwordEncoder.matches(loginRequest.getPassword(), customer.getPassword())) {
-//            return "Login successful! Welcome, " + customer.getName();
-//        } else {
-//            return "Incorrect password.";
-//        }
-//    }
-
-    /**
      * Deletes a customer from the database by their unique identifier.
      *
      * @param customerId The unique identifier of the user to delete
@@ -167,6 +127,20 @@ public class MainController {
         } else {
             return "Customer with ID " + customerId + " not found.";
         }
+    }
+
+    /* *
+            EMPLOYEE METHODS
+     * */
+
+    /**
+     * Retrieves all customers from the database.
+     *
+     * @return An iterable collection of all User entities
+     */
+    @GetMapping(path = RESTNouns.EMPLOYEE)
+    public @ResponseBody Iterable<Employee> getAllEmployees() {
+        return employeeRepository.findAll();
     }
 
     /* *
@@ -376,6 +350,34 @@ public class MainController {
     }
 
     /* *
+     *  HOME QUOTE METHODS
+     * */
+    @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ID)
+    public @ResponseBody Optional<HomeQuote> getHomeQuoteById(@PathVariable("id") Long quoteID) {
+        return homeQuoteRepository.findById(quoteID);
+    }
+
+    @PostMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.CUSTOMER_ID)
+    public @ResponseBody HomeQuote createHomeQuoteByCustomer(
+            @PathVariable("customer_id") Long customerId,
+            @RequestParam LocalDate dateBuilt,
+            @RequestParam int value) {
+        HomeQuote homeQuote = null;
+        if (customerRepository.existsById(customerId)) {
+            Optional<Customer> customer = customerRepository.findById(customerId);
+            if (customer.isPresent()) {
+                homeQuote = new HomeQuote();
+//                auto.setValue(value);
+//                auto.setDateBuilt(dateBuilt);
+//                auto.setCustomer(customer.get());
+                homeQuoteRepository.save(homeQuote);
+            }
+        }
+
+        return homeQuote;
+    }
+
+    /* *
      *  AUTO QUOTE METHODS
      * */
     @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ID)
@@ -383,16 +385,78 @@ public class MainController {
         return autoQuoteRepository.findById(quoteID);
     }
 
-    @PostMapping(path = RESTNouns.AUTO_QUOTE)
-    public @ResponseBody AutoQuote createAutoQuote(
+    @PostMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.CUSTOMER_ID)
+    public @ResponseBody AutoQuote createAutoQuoteForCustomer(
+            @PathVariable("customer_id") Long customerId,
             @RequestParam Integer customerAge,
             @RequestParam Integer vehicleAge,
-            @RequestParam Integer X
+            @RequestParam Integer accidents
     ) {
         AutoQuote quote = new AutoQuote();
+        double factor = 1;
+        if (customerAge < 25) {
+            factor *= 2;
+        }
+        if (accidents > 1) {
+            factor *= 2.5;
+        } else if (accidents == 1) {
+            factor *= 1.25;
+        }
+        if (vehicleAge > 10) {
+            factor *= 2;
+        } else if (vehicleAge > 5) {
+            factor *= 1.5;
+        }
+        if (homePolicyRepository.getHomePolicyByCustId(customerId).iterator().hasNext()) {
+            for (HomePolicy policy : homePolicyRepository.getHomePolicyByCustId(customerId)) {
+                System.out.println();
+            }
+            System.out.println();
+        }
+        /* Calculation Info
+            Base: 750
+            Driver Age: <25 = 2; 1
+            Accidents: >=2 = 2.5; 1 = 1.25; 1
+            Vehicle Age: >10 = 2; >5 = 1.5; 1
+            Discount: Active Home = 0.9
+            Base * All Factors * Tax Rate
+         */
 //        quote.calculateX(name);
 
         return autoQuoteRepository.save(quote);
+    }
+
+
+
+
+
+
+
+    /* *
+     *  HOME POLICY METHODS
+     * */
+    @GetMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ID)
+    public @ResponseBody Optional<HomePolicy> getHomePolicyById(@PathVariable("id") Long quoteID) {
+        return homePolicyRepository.findById(quoteID);
+    }
+
+    @PostMapping(path = RESTNouns.HOME_POLICY + RESTNouns.CUSTOMER_ID)
+    public @ResponseBody HomePolicy createHomePolicyByCustomer(
+            @PathVariable("customer_id") Long customerId,
+            @RequestParam LocalDate dateBuilt,
+            @RequestParam int value) {
+        HomePolicy homePolicy = null;
+        if (customerRepository.existsById(customerId)) {
+            Optional<Customer> customer = customerRepository.findById(customerId);
+            if (customer.isPresent()) {
+                homePolicy = new HomePolicy();
+//                auto.setValue(value);
+//                auto.setDateBuilt(dateBuilt);
+//                auto.setCustomer(customer.get());
+                homePolicyRepository.save(homePolicy);
+            }
+        }
+        return homePolicy;
     }
 
 }
