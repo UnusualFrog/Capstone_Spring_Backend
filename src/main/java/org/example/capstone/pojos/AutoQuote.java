@@ -13,10 +13,12 @@ public class AutoQuote {
     private LocalDate generationDate;
     private boolean active = true;
     private double premium;
+    private double basePremium;
     private double taxRate;
     @ManyToOne
     @JoinColumn(name = "auto_id")
     private Auto auto;
+    private int custId;
 
     public int getId() {
         return id;
@@ -64,5 +66,21 @@ public class AutoQuote {
 
     public Auto getAuto() {
         return auto;
+    }
+
+    public double getBasePremium() {
+        return basePremium;
+    }
+
+    public void setBasePremium(double basePremium) {
+        this.basePremium = basePremium;
+    }
+
+    public int getCustId() {
+        return custId;
+    }
+
+    public void setCustId(int custId) {
+        this.custId = custId;
     }
 }

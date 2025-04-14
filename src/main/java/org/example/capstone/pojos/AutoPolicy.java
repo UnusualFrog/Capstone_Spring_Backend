@@ -12,6 +12,7 @@ public class AutoPolicy {
     private LocalDate effectiveDate;
     private LocalDate endDate;
     private double premium;
+    private double basePremium;
     private double taxRate;
     private boolean active = true;
     @ManyToOne
@@ -81,5 +82,13 @@ public class AutoPolicy {
 
     public int getCustId() {
         return custId;
+    }
+
+    public double getBasePremium() {
+        return basePremium;
+    }
+
+    public void setBasePremium(double basePremium) {
+        this.basePremium = basePremium;
     }
 }

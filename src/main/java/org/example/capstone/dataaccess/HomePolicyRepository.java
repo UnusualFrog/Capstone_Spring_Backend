@@ -1,7 +1,6 @@
 package org.example.capstone.dataaccess;
 
 import org.example.capstone.pojos.HomePolicy;
-import org.example.capstone.pojos.HomeQuote;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -15,5 +14,5 @@ public interface HomePolicyRepository extends CrudRepository<HomePolicy, Long> {
      * @return
      */
     Iterable<HomePolicy> getHomePolicyById(Long homePolicyId);
-    Iterable<HomePolicy> getHomePolicyByCustId(Long customerId);
+    Iterable<HomePolicy> getAllByCustId(Long customerId);
 }

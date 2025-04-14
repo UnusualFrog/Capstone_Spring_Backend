@@ -1,8 +1,7 @@
 package org.example.capstone.dataaccess;
 
-import org.example.capstone.pojos.Auto;
 import org.example.capstone.pojos.AutoQuote;
-import org.example.capstone.pojos.Home;
+import org.example.capstone.pojos.HomeQuote;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -17,5 +16,5 @@ public interface AutoQuoteRepository extends CrudRepository<AutoQuote, Long> {
      */
     Iterable<AutoQuote> getAutoQuotesById(Long autoQuoteID);
 //    Iterable<AutoQuote> getAllAutoQuotesById(Long userId);
-//    Iterable<AutoQuote> getAutoQuotesById();
+    Iterable<AutoQuote> getAllByCustId(Long customerID);
 }

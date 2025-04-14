@@ -15,10 +15,18 @@ public class Address {
     private String street;
     private String city;
     private String province;
-    private String zip;
+    private String postalCode;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String toString() {
-        return unit + " " + street + "\n" + city + ", " + province + " " + zip;
+        return unit + " " + street + "\n" + city + ", " + province + " " + postalCode;
     }
 
     public Integer getUnit() {
@@ -53,11 +61,11 @@ public class Address {
         this.province = province;
     }
 
-    public String getZip() {
-        return zip;
+    public String getPostalCode() {
+        return postalCode;
     }
 
-    public void setZip(String zip) {
-        this.zip = zip;
+    public void setPostalCode(String zip) {
+        this.postalCode = zip;
     }
 }

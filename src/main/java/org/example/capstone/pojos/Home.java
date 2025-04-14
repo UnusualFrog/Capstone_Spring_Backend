@@ -21,6 +21,10 @@ public class Home {
     @Enumerated(EnumType.ORDINAL)
     private HeatingType heatingType;
     private Location location;
+    private DwellingType typeOfDwelling;
+    @OneToOne
+    @JoinColumn(name = "address_id")
+    private Address address;
 
     @ManyToOne
     @JoinColumn(name="customer_id")
@@ -76,6 +80,22 @@ public class Home {
         this.homeValue = homeValue;
     }
 
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    public DwellingType getTypeOfDwelling() {
+        return typeOfDwelling;
+    }
+
+    public void setTypeOfDwelling(DwellingType typeOfDwelling) {
+        this.typeOfDwelling = typeOfDwelling;
+    }
+
     /**
      * Heating type enum
      * {@link #OIL_HEATING}
@@ -111,6 +131,29 @@ public class Home {
          * Rural Location
          */
         RURAL
+    }
+
+    public enum DwellingType {
+        /**
+         * Standalone Dwelling
+         */
+        STANDALONE,
+        /**
+         * Bungalow Dwelling
+         */
+        BUNGALOW,
+        /**
+         * Attached Dwelling
+         */
+        ATTACHED,
+        /**
+         * Semi-attached Dwelling
+         */
+        SEMI_ATTACHED,
+        /**
+         * Other Dwelling types
+         */
+        OTHER_DWELLING
     }
 
 }

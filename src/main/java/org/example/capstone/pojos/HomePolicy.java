@@ -16,6 +16,7 @@ public class HomePolicy {
     @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate endDate;
     private double premium;
+    private double basePremium;
     private int liabilityLimit;
     private double taxRate;
     private boolean active = true;
@@ -94,5 +95,13 @@ public class HomePolicy {
 
     public void setCustId(int custId) {
         this.custId = custId;
+    }
+
+    public double getBasePremium() {
+        return basePremium;
+    }
+
+    public void setBasePremium(double basePremium) {
+        this.basePremium = basePremium;
     }
 }

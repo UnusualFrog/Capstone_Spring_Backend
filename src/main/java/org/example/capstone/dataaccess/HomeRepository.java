@@ -1,5 +1,6 @@
 package org.example.capstone.dataaccess;
 
+import org.example.capstone.pojos.Customer;
 import org.example.capstone.pojos.Home;
 import org.springframework.data.repository.CrudRepository;
 
@@ -14,4 +15,5 @@ public interface HomeRepository extends CrudRepository<Home, Long> {
      * @return
      */
     Iterable<Home> getAllHomesById(Long userId);
+    Iterable<Home> getAllHomesByCustomer(Customer customer);
 }

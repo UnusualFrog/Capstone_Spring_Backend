@@ -14,13 +14,15 @@ public class Customer {
     private Integer id;
     @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate birthday;
-    private Integer accidentCount;
     private String firstName;
     private String lastName;
     private String email;
     private String username;
     // @JsonIgnore //hides from json / removable if necessary
     private String password;
+    @ManyToOne
+    @JoinColumn(name = "address_id")
+    private Address address;
 
     public Integer getId() {
         return id;
@@ -36,14 +38,6 @@ public class Customer {
 
     public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
-    }
-
-    public Integer getAccidentCount() {
-        return accidentCount;
-    }
-
-    public void setAccidentCount(Integer accidentCount) {
-        this.accidentCount = accidentCount;
     }
 
     /**
@@ -100,5 +94,13 @@ public class Customer {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
     }
 }

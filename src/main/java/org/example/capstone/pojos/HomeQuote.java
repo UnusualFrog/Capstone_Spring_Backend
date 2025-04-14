@@ -13,11 +13,13 @@ public class HomeQuote {
     private LocalDate generationDate;
     private boolean active = true;
     private double premium;
+    private double basePremium;
     private int liabilityLimit;
     private double taxRate;
     @ManyToOne
     @JoinColumn(name = "home_id")
     private Home home;
+    private int custId;
 
     public int getId() {
         return id;
@@ -73,5 +75,21 @@ public class HomeQuote {
 
     public void setHome(Home home) {
         this.home = home;
+    }
+
+    public double getBasePremium() {
+        return basePremium;
+    }
+
+    public void setBasePremium(double basePremium) {
+        this.basePremium = basePremium;
+    }
+
+    public int getCustId() {
+        return custId;
+    }
+
+    public void setCustId(int custId) {
+        this.custId = custId;
     }
 }

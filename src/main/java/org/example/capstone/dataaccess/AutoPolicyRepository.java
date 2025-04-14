@@ -1,7 +1,6 @@
 package org.example.capstone.dataaccess;
 
 import org.example.capstone.pojos.AutoPolicy;
-import org.example.capstone.pojos.HomeQuote;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -15,5 +14,5 @@ public interface AutoPolicyRepository extends CrudRepository<AutoPolicy, Long> {
      * @return
      */
     Iterable<AutoPolicy> getAutoPoliciesById(Long autoPolicyID);
-    Iterable<AutoPolicy> getAutoPoliciesByCustId(Long customerId);
+    Iterable<AutoPolicy> getAllByCustId(Long customerId);
 }
