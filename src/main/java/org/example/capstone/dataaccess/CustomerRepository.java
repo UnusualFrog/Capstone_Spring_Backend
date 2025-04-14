@@ -10,7 +10,7 @@ public interface CustomerRepository extends CrudRepository<Customer, Long> {
     Customer getCustomerById(Integer id);
     boolean existsByUsername(String username);
     Customer findByUsername(String username);
-//    Iterable<Customer> getAllCustomersByName(String name);
+    Iterable<Customer> getAllCustomersByFirstNameAndLastName(String firstName, String lastName);
     Iterable<Customer> getAllCustomersByEmail(String email);
 
     //This is where you write code needed beyond the basics

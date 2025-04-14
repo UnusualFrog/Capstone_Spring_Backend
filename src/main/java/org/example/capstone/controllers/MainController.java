@@ -142,13 +142,12 @@ public class MainController {
         return customerRepository.findById(customerId);
     }
 
-//    @GetMapping(path = RESTNouns.CUSTOMER + RESTNouns.NAME)
-//    public @ResponseBody Iterable<Customer> getAllCustomersByName(
-//            @RequestParam String firstName,
-//            @RequestParam String lastName) {
-//        String name = firstName + " " + lastName;
-//        return customerRepository.getAllCustomersByName(name);
-//    }
+    @GetMapping(path = RESTNouns.CUSTOMER + RESTNouns.NAME)
+    public @ResponseBody Iterable<Customer> getAllCustomersByName(
+            @RequestParam String firstName,
+            @RequestParam String lastName) {
+        return customerRepository.getAllCustomersByFirstNameAndLastName(firstName, lastName);
+    }
 
     @GetMapping(path = RESTNouns.CUSTOMER + RESTNouns.EMAIL)
     public @ResponseBody Iterable<Customer> getAllCustomersByEmail(
@@ -611,6 +610,11 @@ public class MainController {
         return homeQuoteRepository.getAllByCustId(customerID);
     }
 
+//    @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ACTIVE + RESTNouns.CUSTOMER_ID)
+//    public @ResponseBody Iterable<HomeQuote> getAllActiveHomeQuotesByCustomerId(@PathVariable("customer_id") Long customerID) {
+//        return homeQuoteRepository.getAllByCustId(customerID);
+//    }
+
     @PostMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.HOME_ID)
     public @ResponseBody HomeQuote createHomeQuoteByCustomer(
             @PathVariable("customer_id") Long customerId,
@@ -715,6 +719,11 @@ public class MainController {
     public @ResponseBody Iterable<AutoQuote> getAllAutoQuotesByCustomerId(@PathVariable("customer_id") Long customerID) {
         return autoQuoteRepository.getAllByCustId(customerID);
     }
+
+//    @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ACTIVE + RESTNouns.CUSTOMER_ID)
+//    public @ResponseBody Iterable<AutoQuote> getAllActiveAutoQuotesByCustomerId(@PathVariable("customer_id") Long customerID) {
+//        return autoQuoteRepository.getAllByCustId(customerID);
+//    }
 
     @PostMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.AUTO_ID)
     public @ResponseBody AutoQuote createAutoQuoteByCustomer(

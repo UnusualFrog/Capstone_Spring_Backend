@@ -18,6 +18,7 @@ public class RESTNouns {
     public static final String ACCIDENT = "/accidents";
     public static final String AUTO_QUOTE = "/auto_quotes";
     public static final String AUTO_POLICY = "/auto_policies";
+    public static final String ACTIVE = "/actives";
     public static final String ID = "/{id}";
     public static final String ADDRESS_ID = "/{address_id}";
     public static final String HOME_ID = "/{home_id}";
