@@ -31,6 +31,30 @@ public class AutoPolicy {
         return endDate;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setEffectiveDate(LocalDate effectiveDate) {
+        this.effectiveDate = effectiveDate;
+    }
+
+    public void setPremium(double premium) {
+        this.premium = premium;
+    }
+
+    public void setTaxRate(double taxRate) {
+        this.taxRate = taxRate;
+    }
+
+    public void setAuto(Auto auto) {
+        this.auto = auto;
+    }
+
+    public void setCustId(int custId) {
+        this.custId = custId;
+    }
+
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }

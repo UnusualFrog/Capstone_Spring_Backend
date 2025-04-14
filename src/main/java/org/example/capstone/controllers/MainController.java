@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.springframework.http.HttpStatus;
 
-
-
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.HashMap;
@@ -132,7 +130,7 @@ public class MainController {
      * @return An Optional containing the User if found, or an empty Optional
      */
     @GetMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID)
-    public @ResponseBody Optional<Customer> getCustomer(@PathVariable("id") Long customerId) {
+    public @ResponseBody Optional<Customer> getCustomerById(@PathVariable("id") Long customerId) {
         return customerRepository.findById(customerId);
     }
 
@@ -160,22 +158,6 @@ public class MainController {
         customer.setUsername(username);
         customer.setPassword(password);
         return customerRepository.save(customer);
-    }
-
-    /**
-     * Deletes a customer from the database by their unique identifier.
-     *
-     * @param customerId The unique identifier of the user to delete
-     * @return A string message indicating the result of the deletion operation
-     */
-    @DeleteMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID)
-    public @ResponseBody String deleteCustomer(@PathVariable("id") Long customerId) {
-        if (customerRepository.existsById(customerId)) {
-            customerRepository.deleteById(customerId);
-            return "Customer with ID " + customerId + " deleted successfully.";
-        } else {
-            return "Customer with ID " + customerId + " not found.";
-        }
     }
 
     /**
@@ -212,6 +194,22 @@ public class MainController {
         }
     }
 
+    /**
+     * Deletes a customer from the database by their unique identifier.
+     *
+     * @param customerId The unique identifier of the user to delete
+     * @return A string message indicating the result of the deletion operation
+     */
+    @DeleteMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID)
+    public @ResponseBody String deleteCustomer(@PathVariable("id") Long customerId) {
+        if (customerRepository.existsById(customerId)) {
+            customerRepository.deleteById(customerId);
+            return "Customer with ID " + customerId + " deleted successfully.";
+        } else {
+            return "Customer with ID " + customerId + " not found.";
+        }
+    }
+
     /* *
             EMPLOYEE METHODS
      * */
@@ -238,7 +236,7 @@ public class MainController {
      * @return An iterable collection of Home entities belonging to the specified customer
      */
     @GetMapping(path = RESTNouns.CUSTOMER +  RESTNouns.ID + RESTNouns.HOME)
-    public @ResponseBody Iterable<Home> getAllHomesByUser(@PathVariable("id") Long customerId) {
+    public @ResponseBody Iterable<Home> getAllHomesByCustomer(@PathVariable("id") Long customerId) {
         Iterable<Home> homes = null;
         if (customerRepository.existsById(customerId)) {
             Optional<Customer> user = customerRepository.findById(customerId);
@@ -246,8 +244,6 @@ public class MainController {
                 homes = homeRepository.getAllHomesById(customerId);
             }
         }
-
-        //TODO handle errors
 
         return homes;
     }
@@ -348,7 +344,7 @@ public class MainController {
      *         or null if the user does not exist
      */
     @GetMapping(path = RESTNouns.CUSTOMER +  RESTNouns.ID + RESTNouns.AUTO)
-    public @ResponseBody Iterable<Auto> getAllAutosByUser(@PathVariable("id") Long customerId) {
+    public @ResponseBody Iterable<Auto> getAllAutosByCustomer(@PathVariable("id") Long customerId) {
         Iterable<Auto> autos = null;
         if (customerRepository.existsById(customerId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
@@ -395,19 +391,22 @@ public class MainController {
      *
      * @param userId The unique identifier of the user who owns the auto
      * @param autoId The unique identifier of the auto to be updated
-     * @param dateBuilt The new date when the auto was built
-     * @param value The new monetary value of the auto
      * @return A string message indicating the result of the update operation
      */
     @PutMapping(path = RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID + RESTNouns.AUTO + RESTNouns.AUTO_ID)
-    public @ResponseBody String updateAutoByCustomer(@PathVariable("customer_id") Long userId, @PathVariable("auto_id") Long autoId, @RequestParam LocalDate dateBuilt, @RequestParam int value){
+    public @ResponseBody String updateAutoByCustomer(
+            @PathVariable("customer_id") Long userId,
+            @PathVariable("auto_id") Long autoId,
+            @RequestParam String make,
+            @RequestParam String model,
+            @RequestParam Integer year){
         if (customerRepository.existsById(userId) && autoRepository.existsById(autoId)) {
             Optional<Customer> customer = customerRepository.findById(userId);
             Optional<Auto> auto = autoRepository.findById(autoId);
             if(customer.isPresent() && auto.isPresent()){
-//                auto.get().setDateBuilt(dateBuilt);
-//                auto.get().setValue(value);
-
+                auto.get().setMake(make);
+                auto.get().setModel(model);
+                auto.get().setYear(year);
                 autoRepository.save(auto.get());
                 customerRepository.save(customer.get());
             }
@@ -458,7 +457,8 @@ public class MainController {
     public @ResponseBody String createHomeQuoteByCustomer(
             @PathVariable("customer_id") Long customerId,
             @PathVariable("home_id") Long homeId,
-            @RequestParam int liability
+            @RequestParam int liability,
+            @RequestParam boolean packagedQuote
     ) {
         Optional<Home> home = homeRepository.findById(homeId);
         Optional<Customer> customer = customerRepository.findById(customerId);
@@ -482,9 +482,11 @@ public class MainController {
             if (home.get().getLocation() == Home.Location.RURAL) {
                 factor *= 1.15;
             }
-            if (autoPolicyRepository.getAutoPolicyByCustId(customerId).iterator().hasNext()) {
+            if (packagedQuote) {
+                factor *= 0.9;
+            } else if (autoPolicyRepository.getAutoPoliciesByCustId(customerId).iterator().hasNext()) {
                 double factorAdjust = 1;
-                for (AutoPolicy policy : autoPolicyRepository.getAutoPolicyByCustId(customerId)) {
+                for (AutoPolicy policy : autoPolicyRepository.getAutoPoliciesByCustId(customerId)) {
                     if (policy.getActive()) {
                         factorAdjust = 0.9;
                         break;
@@ -500,16 +502,6 @@ public class MainController {
             quote.setLiabilityLimit(liability);
             quote.setTaxRate(taxRate);
             quote.setHome(home.get());
-        /* Calculation Info
-            Base: 500
-            Home Value: >250k = v*0.2; 0;
-            Liability: 2m = 1.25; 1
-            Home Age: >50 = 1.5; >25 = 1.25; 1
-            Heating: Oil = 2; Wood = 1.25; 1
-            Location: Rural = 1.15; Urban = 1
-            Discount: Active Auto = 0.9
-            (Base + Value Premium) * All Factors * Tax Rate
-         */
             homeQuoteRepository.save(quote);
             return "Quote Generated!";
         }
@@ -520,14 +512,12 @@ public class MainController {
     public @ResponseBody String updateHomeQuoteByCustomer(
             @PathVariable("customer_id") Long customerId,
             @PathVariable("quote_id") Long policyId,
-            @RequestParam LocalDate dateBuilt,
-            @RequestParam int value){
+            @RequestParam boolean activeStatus){
         if (customerRepository.existsById(customerId) && homeQuoteRepository.existsById(policyId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
             Optional<HomeQuote> homeQuote = homeQuoteRepository.findById(policyId);
             if(customer.isPresent() && homeQuote.isPresent()){
-//                auto.get().setDateBuilt(dateBuilt);
-//                auto.get().setValue(value);
+                homeQuote.get().setActive(activeStatus);
 
                 homeQuoteRepository.save(homeQuote.get());
                 customerRepository.save(customer.get());
@@ -537,20 +527,6 @@ public class MainController {
             return "Home Quote with ID " + policyId + " not found.";
         }
     }
-
-    @DeleteMapping(path = RESTNouns.HOME_POLICY + RESTNouns.CUSTOMER_ID + RESTNouns.QUOTE_ID)
-    public @ResponseBody String deleteHomeQuoteByCustomer(
-            @PathVariable("customer_id") Long customerId,
-            @PathVariable("quote_id") Long quoteId) {
-        if (customerRepository.existsById(customerId) && homeQuoteRepository.existsById(quoteId)) {
-            homeQuoteRepository.deleteById(quoteId);
-            return "Home Quote with ID " + quoteId + " deleted successfully.";
-        } else {
-            return "Home Quote with ID " + quoteId + " not found.";
-        }
-    }
-
-
 
 
     /* *
@@ -572,26 +548,11 @@ public class MainController {
         return autoQuoteRepository.findById(quoteID);
     }
 
-//    @GetMapping(path = RESTNouns.CUSTOMER +  RESTNouns.ID + RESTNouns.AUTO_QUOTE)
-//    public @ResponseBody Iterable<AutoQuote> getAllAutoQuotesByUser(@PathVariable("id") Long customerId) {
-//        Iterable<AutoQuote> autoQuotes = null;
-//        if (customerRepository.existsById(customerId)) {
-//            Optional<Customer> user = customerRepository.findById(customerId);
-//            if(user.isPresent()){
-////                autoQuotes = autoQuoteRepository.getAllAutoQuotesById(customerId);
-//            }
-//        }
-//
-//        //TODO handle errors
-//
-//        return autoQuotes;
-//    }
-
     @PostMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.AUTO_ID)
     public @ResponseBody String createAutoQuoteForCustomer(
             @PathVariable("customer_id") Long customerId,
-            @PathVariable("auto_id") Long autoId
-    ) {
+            @PathVariable("auto_id") Long autoId,
+            @RequestParam boolean packagedQuote) {
         Optional<Auto> auto = autoRepository.findById(autoId);
         Optional<Customer> customer = customerRepository.findById(customerId);
         if (auto.isPresent() && customer.isPresent()) {
@@ -611,7 +572,9 @@ public class MainController {
             } else if (today.getYear() - auto.get().getYear() > 5) {
                 factor *= 1.5;
             }
-            if (homePolicyRepository.getHomePolicyByCustId(customerId).iterator().hasNext()) {
+            if (packagedQuote) {
+                factor *= 0.9;
+            } else if (homePolicyRepository.getHomePolicyByCustId(customerId).iterator().hasNext()) {
                 double factorAdjust = 1;
                 for (HomePolicy policy : homePolicyRepository.getHomePolicyByCustId(customerId)) {
                     if (policy.getActive()) {
@@ -627,65 +590,85 @@ public class MainController {
             quote.setPremium(premium);
             quote.setTaxRate(taxRate);
             quote.setAuto(auto.get());
-        /* Calculation Info
-            Base: 750
-            Driver Age: <25 = 2; 1
-            Accidents: >=2 = 2.5; 1 = 1.25; 1
-            Vehicle Age: >10 = 2; >5 = 1.5; 1
-            Discount: Active Home = 0.9
-            Base * All Factors * Tax Rate
-         */
             autoQuoteRepository.save(quote);
             return "Quote Generated!";
         }
         return "Customer or Vehicle not present.";
     }
 
+    @PutMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.QUOTE_ID)
+    public @ResponseBody String updateAutoQuoteByCustomer(
+            @PathVariable("customer_id") Long customerId,
+            @PathVariable("quote_id") Long policyId,
+            @RequestParam boolean activeStatus) {
+        if (customerRepository.existsById(customerId) && autoQuoteRepository.existsById(policyId)) {
+            Optional<Customer> customer = customerRepository.findById(customerId);
+            Optional<AutoQuote> autoQuote = autoQuoteRepository.findById(policyId);
+            if(customer.isPresent() && autoQuote.isPresent()){
+                autoQuote.get().setActive(activeStatus);
 
-
-
-
+                autoQuoteRepository.save(autoQuote.get());
+                customerRepository.save(customer.get());
+            }
+            return "Auto Quote with ID " + policyId + " updated successfully.";
+        } else {
+            return "Auto Quote with ID " + policyId + " not found.";
+        }
+    }
 
 
     /* *
      *  HOME POLICY METHODS
      * */
+
+    /**
+     * Retrieves all home policies from the database.
+     *
+     * @return An iterable collection of all HomePolicy entities
+     */
+    @GetMapping(path = RESTNouns.HOME_POLICY)
+    public @ResponseBody Iterable<HomePolicy> getAllHomePolicies() {
+        return homePolicyRepository.findAll();
+    }
+
     @GetMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ID)
     public @ResponseBody Optional<HomePolicy> getHomePolicyById(@PathVariable("id") Long quoteID) {
         return homePolicyRepository.findById(quoteID);
     }
 
-    @PostMapping(path = RESTNouns.HOME_POLICY + RESTNouns.CUSTOMER_ID)
-    public @ResponseBody HomePolicy createHomePolicyByCustomer(
-            @PathVariable("customer_id") Long customerId,
-            @RequestParam LocalDate dateBuilt,
-            @RequestParam int value) {
-        HomePolicy homePolicy = null;
-        if (customerRepository.existsById(customerId)) {
-            Optional<Customer> customer = customerRepository.findById(customerId);
-            if (customer.isPresent()) {
-                homePolicy = new HomePolicy();
-//                auto.setValue(value);
-//                auto.setDateBuilt(dateBuilt);
-//                auto.setCustomer(customer.get());
-                homePolicyRepository.save(homePolicy);
-            }
+    @PostMapping(path = RESTNouns.HOME_POLICY + RESTNouns.QUOTE_ID)
+    public @ResponseBody String createHomePolicyByHomeQuote(
+            @PathVariable("quote_id") Long quoteId,
+            @RequestParam LocalDate effectiveDate) {
+        Optional<HomeQuote> quoteOptional = homeQuoteRepository.findById(quoteId);
+        if (quoteOptional.isPresent()) {
+            HomeQuote quote = quoteOptional.get();
+            HomePolicy policy = new HomePolicy();
+            policy.setEffectiveDate(effectiveDate);
+            policy.setEndDate(effectiveDate.plusYears(1));
+            policy.setPremium(quote.getPremium());
+            policy.setLiabilityLimit(quote.getLiabilityLimit());
+            policy.setTaxRate(quote.getTaxRate());
+            policy.setHome(quote.getHome());
+            policy.setCustId(quote.getHome().getCustomer().getId());
+            homePolicyRepository.save(policy);
+            return "Home Policy created.";
         }
-        return homePolicy;
+        return "Home Policy could not be created.";
     }
 
-@PutMapping(path = RESTNouns.HOME_POLICY + RESTNouns.CUSTOMER_ID + RESTNouns.POLICY_ID)
+    @PutMapping(path = RESTNouns.HOME_POLICY + RESTNouns.CUSTOMER_ID + RESTNouns.POLICY_ID)
     public @ResponseBody String updateHomePolicyByCustomer(
             @PathVariable("customer_id") Long customerId,
             @PathVariable("policy_id") Long policyId,
-            @RequestParam LocalDate dateBuilt,
-            @RequestParam int value){
+            @RequestParam boolean activeStatus,
+            @RequestParam LocalDate endDate){
         if (customerRepository.existsById(customerId) && homePolicyRepository.existsById(policyId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
             Optional<HomePolicy> homePolicy = homePolicyRepository.findById(policyId);
             if(customer.isPresent() && homePolicy.isPresent()){
-//                auto.get().setDateBuilt(dateBuilt);
-//                auto.get().setValue(value);
+                homePolicy.get().setActive(activeStatus);
+                homePolicy.get().setEndDate(endDate);
 
                 homePolicyRepository.save(homePolicy.get());
                 customerRepository.save(customer.get());
@@ -696,16 +679,67 @@ public class MainController {
         }
     }
 
-    @DeleteMapping(path = RESTNouns.HOME_POLICY + RESTNouns.CUSTOMER_ID + RESTNouns.POLICY_ID)
-    public @ResponseBody String deleteHomePolicyByCustomer(
+
+    /* *
+     *  AUTO POLICY METHODS
+     * */
+
+    /**
+     * Retrieves all auto policies from the database.
+     *
+     * @return An iterable collection of all AutoPolicy entities
+     */
+    @GetMapping(path = RESTNouns.AUTO_POLICY)
+    public @ResponseBody Iterable<AutoPolicy> getAllAutoPolicies() {
+        return autoPolicyRepository.findAll();
+    }
+
+    @GetMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.ID)
+    public @ResponseBody Optional<AutoPolicy> getAutoPolicyById(@PathVariable("id") Long quoteID) {
+        return autoPolicyRepository.findById(quoteID);
+    }
+
+    @PostMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.QUOTE_ID)
+    public @ResponseBody String createAutoPolicyByHomeQuote(
+            @PathVariable("quote_id") Long quoteId,
+            @RequestParam LocalDate effectiveDate) {
+        Optional<AutoQuote> quoteOptional = autoQuoteRepository.findById(quoteId);
+        if (quoteOptional.isPresent()) {
+            AutoQuote quote = quoteOptional.get();
+            AutoPolicy policy = new AutoPolicy();
+            policy.setEffectiveDate(effectiveDate);
+            policy.setEndDate(effectiveDate.plusYears(1));
+            policy.setPremium(quote.getPremium());
+            policy.setTaxRate(quote.getTaxRate());
+            policy.setAuto(quote.getAuto());
+            policy.setCustId(quote.getAuto().getCustomer().getId());
+            autoPolicyRepository.save(policy);
+            return "Auto Policy created.";
+        }
+        return "Auto Policy could not be created.";
+    }
+
+    @PutMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.CUSTOMER_ID + RESTNouns.POLICY_ID)
+    public @ResponseBody String updateAutoPolicyByCustomer(
             @PathVariable("customer_id") Long customerId,
-            @PathVariable("policy_id") Long policyId) {
-        if (customerRepository.existsById(customerId) && homePolicyRepository.existsById(policyId)) {
-            homePolicyRepository.deleteById(policyId);
-            return "Home Policy with ID " + policyId + " deleted successfully.";
+            @PathVariable("policy_id") Long policyId,
+            @RequestParam boolean activeStatus,
+            @RequestParam LocalDate endDate){
+        if (customerRepository.existsById(customerId) && autoPolicyRepository.existsById(policyId)) {
+            Optional<Customer> customer = customerRepository.findById(customerId);
+            Optional<AutoPolicy> autoPolicy = autoPolicyRepository.findById(policyId);
+            if(customer.isPresent() && autoPolicy.isPresent()){
+                autoPolicy.get().setActive(activeStatus);
+                autoPolicy.get().setEndDate(endDate);
+
+                autoPolicyRepository.save(autoPolicy.get());
+                customerRepository.save(customer.get());
+            }
+            return "Auto Policy with ID " + policyId + " updated successfully.";
         } else {
             return "Home Policy with ID " + policyId + " not found.";
         }
     }
+
 
 }
