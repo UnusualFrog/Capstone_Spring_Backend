@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.springframework.http.HttpStatus;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-// TODO Nested Delete/Make Delete On Things With Relationships Work
 
 /**
  * The main controller for this application, handling RESTful endpoints
@@ -36,15 +36,13 @@ public class MainController {
     @Autowired private AutoQuoteRepository autoQuoteRepository;
     @Autowired private AutoPolicyRepository autoPolicyRepository;
     @Autowired private StrongPasswordEncryptor passwordEncryptor; //Choose x-www-form-urlencoded under BODY for register/login POSTS
+    @Autowired private AccidentsRepository accidentsRepository;
+    @Autowired private AddressRepository addressRepository;
 
     private double taxRate = 0.15;
     private double baseAutoPremium = 750;
     private double baseHomePremium = 500;
-
-    @Autowired
-    private AccidentsRepository accidentsRepository;
-    @Autowired
-    private AddressRepository addressRepository;
+    private DecimalFormat decimalFormatter = new DecimalFormat("#.##");
 
     /* *
      *  Customer METHODS
@@ -281,31 +279,37 @@ public class MainController {
     /**
      * Updates an existing home associated with a specific customer.
      *
-     * @param customerId The unique identifier of the user who owns the home
      * @param homeId The unique identifier of the home to be updated
      * @param dateBuilt The new date when the home was built
      * @param homeValue The new monetary value of the home
      * @return A string message indicating the result of the update operation
      */
-    @PutMapping(path = RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID + RESTNouns.HOME + RESTNouns.HOME_ID)
-    public @ResponseBody String updateHomeByCustomer(
-            @PathVariable("customer_id") Long customerId, @PathVariable("home_id") Long homeId,
+    @PutMapping(path =  RESTNouns.HOME + RESTNouns.HOME_ID)
+    public @ResponseBody String updateHomeById(
+            @PathVariable("home_id") Long homeId,
             @RequestParam LocalDate dateBuilt,
             @RequestParam int homeValue,
             @RequestParam Home.HeatingType heatingType,
             @RequestParam Home.Location location,
-            @RequestParam Home.DwellingType dwellingType){
-        if (customerRepository.existsById(customerId) && homeRepository.existsById(homeId)) {
-            Optional<Customer> customer = customerRepository.findById(customerId);
+            @RequestParam Home.DwellingType dwellingType,
+            @RequestParam Long customerId,
+            @RequestParam Long addressId){
+        if (homeRepository.existsById(homeId)) {
             Optional<Home> home = homeRepository.findById(homeId);
-            if(customer.isPresent() && home.isPresent()){
-                home.get().setDateBuilt(dateBuilt);
-                home.get().setHomeValue(homeValue);
-                home.get().setHeatingType(heatingType);
-                home.get().setLocation(location);
-                //TODO Add address/customer/dwelling
-                homeRepository.save(home.get());
-                customerRepository.save(customer.get());
+            if(home.isPresent()){
+                Optional<Customer> customer = customerRepository.findById(customerId);
+                Optional<Address> address = addressRepository.findById(addressId);
+                if (customer.isPresent() && address.isPresent()) {
+                    home.get().setDateBuilt(dateBuilt);
+                    home.get().setHomeValue(homeValue);
+                    home.get().setHeatingType(heatingType);
+                    home.get().setLocation(location);
+                    home.get().setTypeOfDwelling(dwellingType);
+                    home.get().setCustomer(customer.get());
+                    home.get().setAddress(address.get());
+                    homeRepository.save(home.get());
+                    customerRepository.save(customer.get());
+                }
             }
             return "Home with ID " + homeId + " updated successfully.";
         } else {
@@ -346,49 +350,22 @@ public class MainController {
     }
 
     @PostMapping(path = RESTNouns.ADDRESS)
-        public @ResponseBody Address createAddress(
-                @RequestParam Integer unit,
-                @RequestParam String street,
-                @RequestParam String city,
-                @RequestParam String province,
-                @RequestParam String postalCode) {
-            Address address = null;
-            address = new Address();
-            address.setUnit(unit);
-            address.setStreet(street);
-            address.setCity(city);
-            address.setProvince(province);
-            address.setPostalCode(postalCode);
-            addressRepository.save(address);
+    public @ResponseBody Address createAddress(
+            @RequestParam Integer unit,
+            @RequestParam String street,
+            @RequestParam String city,
+            @RequestParam String province,
+            @RequestParam String postalCode) {
+        Address address = new Address();
+        address.setUnit(unit);
+        address.setStreet(street);
+        address.setCity(city);
+        address.setProvince(province);
+        address.setPostalCode(postalCode);
+        addressRepository.save(address);
 
-            return address;
-        }
-
-
-//    @PostMapping(path = RESTNouns.ADDRESS + RESTNouns.HOME + RESTNouns.HOME_ID)
-//    public @ResponseBody Address createAddressByHome(
-//            @PathVariable("home_id") Long homeId,
-//            @RequestParam Integer unit,
-//            @RequestParam String street,
-//            @RequestParam String city,
-//            @RequestParam String province,
-//            @RequestParam String postalCode) {
-//        Address address = null;
-//        if (homeRepository.existsById(homeId)) {
-//            Optional<Home> home = homeRepository.findById(homeId);
-//            if (home.isPresent()) {
-//                address = new Address();
-//                address.setUnit(unit);
-//                address.setStreet(street);
-//                address.setCity(city);
-//                address.setProvince(province);
-//                address.setPostalCode(postalCode);
-//                addressRepository.save(address);
-//            }
-//        }
-//
-//        return address;
-//    }
+        return address;
+    }
 
     @PutMapping(path = RESTNouns.ADDRESS + RESTNouns.ADDRESS_ID)
         public @ResponseBody String updateAddressById(
@@ -610,10 +587,10 @@ public class MainController {
         return homeQuoteRepository.getAllByCustId(customerID);
     }
 
-//    @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ACTIVE + RESTNouns.CUSTOMER_ID)
-//    public @ResponseBody Iterable<HomeQuote> getAllActiveHomeQuotesByCustomerId(@PathVariable("customer_id") Long customerID) {
-//        return homeQuoteRepository.getAllByCustId(customerID);
-//    }
+    @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ACTIVE + RESTNouns.CUSTOMER_ID)
+    public @ResponseBody Iterable<HomeQuote> getAllActiveHomeQuotesByCustomerId(@PathVariable("customer_id") Long customerID) {
+        return homeQuoteRepository.getAllActiveByCustIdAndActive(customerID, true);
+    }
 
     @PostMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.HOME_ID)
     public @ResponseBody HomeQuote createHomeQuoteByCustomer(
@@ -660,6 +637,7 @@ public class MainController {
                 }
                 double addPremium = (home.get().getHomeValue() > 250000) ? home.get().getHomeValue() * 0.002 : 0;
                 double premium = (baseHomePremium + addPremium) * factor * (taxRate + 1);
+                premium = Double.parseDouble(decimalFormatter.format(premium));
                 quote = new HomeQuote();
                 quote.setPremium(premium);
                 quote.setGenerationDate(today);
@@ -720,10 +698,10 @@ public class MainController {
         return autoQuoteRepository.getAllByCustId(customerID);
     }
 
-//    @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ACTIVE + RESTNouns.CUSTOMER_ID)
-//    public @ResponseBody Iterable<AutoQuote> getAllActiveAutoQuotesByCustomerId(@PathVariable("customer_id") Long customerID) {
-//        return autoQuoteRepository.getAllByCustId(customerID);
-//    }
+    @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ACTIVE + RESTNouns.CUSTOMER_ID)
+    public @ResponseBody Iterable<AutoQuote> getAllActiveAutoQuotesByCustomerId(@PathVariable("customer_id") Long customerID) {
+        return autoQuoteRepository.getAllActiveByCustIdAndActive(customerID, true);
+    }
 
     @PostMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.AUTO_ID)
     public @ResponseBody AutoQuote createAutoQuoteByCustomer(
@@ -771,6 +749,7 @@ public class MainController {
                     factor *= factorAdjust;
                 }
                 double premium = baseAutoPremium * factor * (taxRate + 1);
+                premium = Double.parseDouble(decimalFormatter.format(premium));
                 quote = new AutoQuote();
                 quote.setGenerationDate(today);
                 quote.setPremium(premium);
@@ -827,6 +806,11 @@ public class MainController {
     @GetMapping(path = RESTNouns.HOME_POLICY + RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID)
     public @ResponseBody Iterable<HomePolicy> getAllHomePoliciesByCustomerId(@PathVariable("customer_id") Long customerID) {
         return homePolicyRepository.getAllByCustId(customerID);
+    }
+
+    @GetMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ACTIVE + RESTNouns.CUSTOMER_ID)
+    public @ResponseBody Iterable<HomePolicy> getAllActiveHomePoliciesByCustomerId(@PathVariable("customer_id") Long customerID) {
+        return homePolicyRepository.getAllActiveByCustIdAndActive(customerID, true);
     }
 
     @PostMapping(path = RESTNouns.HOME_POLICY + RESTNouns.QUOTE_ID)
@@ -896,6 +880,11 @@ public class MainController {
     @GetMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID)
     public @ResponseBody Iterable<AutoPolicy> getAllAutoPoliciesByCustomerId(@PathVariable("customer_id") Long customerID) {
         return autoPolicyRepository.getAllByCustId(customerID);
+    }
+
+    @GetMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.ACTIVE + RESTNouns.CUSTOMER_ID)
+    public @ResponseBody Iterable<AutoPolicy> getAllActiveAutoPoliciesByCustomerId(@PathVariable("customer_id") Long customerID) {
+        return autoPolicyRepository.getAllActiveByCustIdAndActive(customerID, true);
     }
 
     @PostMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.QUOTE_ID)

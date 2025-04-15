@@ -17,4 +17,5 @@ public interface AutoQuoteRepository extends CrudRepository<AutoQuote, Long> {
     Iterable<AutoQuote> getAutoQuotesById(Long autoQuoteID);
 //    Iterable<AutoQuote> getAllAutoQuotesById(Long userId);
     Iterable<AutoQuote> getAllByCustId(Long customerID);
+    Iterable<AutoQuote> getAllActiveByCustIdAndActive(Long customerID, boolean active);
 }

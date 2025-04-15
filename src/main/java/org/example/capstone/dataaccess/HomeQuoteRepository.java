@@ -15,4 +15,5 @@ public interface HomeQuoteRepository extends CrudRepository<HomeQuote, Long> {
      */
     Iterable<HomeQuote> getHomeQuotesById(Long homeQuoteID);
     Iterable<HomeQuote> getAllByCustId(Long customerID);
+    Iterable<HomeQuote> getAllActiveByCustIdAndActive(Long customerID, boolean active);
 }
