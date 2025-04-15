@@ -8,7 +8,6 @@ public class RESTNouns {
 
     /* *
      *  NON-PLURALS
-     *
      * */
 
     public static final String VERSION_1 = "/v1";
@@ -26,12 +25,13 @@ public class RESTNouns {
 
     /* *
      *  PLURALS
-     *
      * */
 
     public static final String CUSTOMER = "/customers";
     public static final String EMPLOYEE = "/employees";
     public static final String ADMIN = "/admins";
+
+    // TODO Change the next two nouns to inputs
     public static final String EMAIL = "/emails";
     public static final String NAME = "/names";
     public static final String HOME = "/homes";

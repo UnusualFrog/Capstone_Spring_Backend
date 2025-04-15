@@ -44,7 +44,7 @@ public class MainController {
     private DecimalFormat decimalFormatter = new DecimalFormat("#.##");
 
     /* *
-     *  Customer METHODS
+     *  CUSTOMER METHODS
      * */
 
     /**
@@ -66,6 +66,7 @@ public class MainController {
      * @param password       The plain-text password to be hashed and stored.
      * @return A JSON response indicating success or failure.
      */
+    // TODO Change to address Id to Request Param
     @PostMapping(path = RESTNouns.CUSTOMER + RESTNouns.REGISTER + RESTNouns.ADDRESS_ID)
     public ResponseEntity<Map<String, Object>> createCustomer(
             @PathVariable("address_id") Long addressId,
@@ -159,7 +160,7 @@ public class MainController {
      * @return A string message indicating the result of the update operation
      */
     @PutMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID)
-    public @ResponseBody String updateCustomer(
+    public @ResponseBody String updateCustomerById(
             @PathVariable("id") Long customerId,
             @RequestParam String firstName,
             @RequestParam String lastName,
@@ -190,7 +191,7 @@ public class MainController {
      * @return A string message indicating the result of the deletion operation
      */
     @DeleteMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID)
-    public @ResponseBody String deleteCustomer(@PathVariable("id") Long customerId) {
+    public @ResponseBody String deleteCustomerById(@PathVariable("id") Long customerId) {
         if (customerRepository.existsById(customerId)) {
             customerRepository.deleteById(customerId);
             return "Customer with ID " + customerId + " deleted successfully.";
@@ -200,7 +201,7 @@ public class MainController {
     }
 
     @PutMapping(path = RESTNouns.CUSTOMER + RESTNouns.RESET + RESTNouns.ID)
-    public ResponseEntity<Map<String, Object>> resetCustomerPassword(
+    public ResponseEntity<Map<String, Object>> resetCustomerPasswordById(
             @PathVariable("id") Long customerId,
             @RequestParam String oldPassword,
             @RequestParam String newPassword
@@ -266,7 +267,7 @@ public class MainController {
      * @return A string message indicating the result of the update operation
      */
     @PutMapping(path = RESTNouns.EMPLOYEE + RESTNouns.ID)
-    public @ResponseBody String updateEmployeeName(
+    public @ResponseBody String updateEmployeeNameById(
             @PathVariable("id") Long employeeId,
             @RequestParam String firstName,
             @RequestParam String lastName){
@@ -290,7 +291,7 @@ public class MainController {
      * @return A string message indicating the result of the update operation
      */
     @PutMapping(path = RESTNouns.EMPLOYEE + RESTNouns.CUSTOMER + RESTNouns.ID)
-    public @ResponseBody String employeeUpdateCustomer(
+    public @ResponseBody String employeeUpdateCustomerById(
             @PathVariable("id") Long customerId,
             @RequestParam String firstName,
             @RequestParam String lastName,
@@ -319,7 +320,7 @@ public class MainController {
     }
 
     @PutMapping(path = RESTNouns.EMPLOYEE + RESTNouns.RESET + RESTNouns.ID)
-    public ResponseEntity<Map<String, Object>> resetEmployeePassword(
+    public ResponseEntity<Map<String, Object>> resetEmployeePasswordById(
             @PathVariable("id") Long employeeId,
             @RequestParam String oldPassword,
             @RequestParam String newPassword
@@ -394,7 +395,7 @@ public class MainController {
      * @return A string message indicating the result of the update operation
      */
     @PutMapping(path = RESTNouns.ADMIN + RESTNouns.ID)
-    public @ResponseBody String adminUpdateEmployee(
+    public @ResponseBody String adminUpdateEmployeeById(
             @PathVariable("id") Long employeeId,
             @RequestParam String firstName,
             @RequestParam String lastName,
@@ -424,7 +425,7 @@ public class MainController {
      * @return A string message indicating the result of the deletion operation
      */
     @DeleteMapping(path = RESTNouns.ADMIN + RESTNouns.ID)
-    public @ResponseBody String adminDeleteEmployee(@PathVariable("id") Long employeeId) {
+    public @ResponseBody String adminDeleteEmployeeById(@PathVariable("id") Long employeeId) {
         if (employeeRepository.existsById(employeeId)) {
             employeeRepository.deleteById(employeeId);
             return "Employee with ID " + employeeId + " deleted successfully.";
@@ -443,8 +444,10 @@ public class MainController {
      * @param customerId The unique identifier of the customer whose homes are to be retrieved
      * @return An iterable collection of Home entities belonging to the specified customer
      */
+
+    // TODO Refactor the path
     @GetMapping(path = RESTNouns.CUSTOMER +  RESTNouns.ID + RESTNouns.HOME)
-    public @ResponseBody Iterable<Home> getAllHomesByCustomer(@PathVariable("id") Long customerId) {
+    public @ResponseBody Iterable<Home> getAllHomesByCustomerId(@PathVariable("id") Long customerId) {
         Iterable<Home> homes = null;
         if (customerRepository.existsById(customerId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
@@ -465,7 +468,7 @@ public class MainController {
      * @return The newly created Home entity, or null if the user does not exist
      */
     @PostMapping(path = RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID + RESTNouns.HOME + RESTNouns.ADDRESS_ID)
-    public @ResponseBody Home createHomeByCustomerAndAddress(
+    public @ResponseBody Home createHomeByCustomerAndAddressIds(
             @PathVariable("customer_id") Long customerId,
             @PathVariable("address_id") Long addressId,
             @RequestParam LocalDate dateBuilt,
@@ -541,8 +544,10 @@ public class MainController {
      * @param homeId The unique identifier of the home to be deleted
      * @return A string message indicating the result of the deletion operation
      */
+
+    // TODO refactor to by Home ID only
     @DeleteMapping(path = RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID + RESTNouns.HOME + RESTNouns.HOME_ID)
-    public @ResponseBody String deleteHomeByCustomer(
+    public @ResponseBody String deleteHomeById(
             @PathVariable("customer_id") Long customerId, @PathVariable("home_id") Long homeId) {
         if (customerRepository.existsById(customerId) && homeRepository.existsById(homeId)) {
             homeRepository.deleteById(homeId);
@@ -630,8 +635,10 @@ public class MainController {
      * @return An iterable collection of Auto entities belonging to the specified user,
      *         or null if the user does not exist
      */
+
+    // TODO refactor the path
     @GetMapping(path = RESTNouns.CUSTOMER +  RESTNouns.ID + RESTNouns.AUTO)
-    public @ResponseBody Iterable<Auto> getAllAutosByCustomer(@PathVariable("id") Long customerId) {
+    public @ResponseBody Iterable<Auto> getAllAutosByCustomerId(@PathVariable("id") Long customerId) {
         Iterable<Auto> autos = null;
         if (customerRepository.existsById(customerId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
@@ -648,8 +655,10 @@ public class MainController {
      * @param customerId The unique identifier of the user for whom the auto is being created
      * @return The newly created Auto entity, or null if the user does not exist
      */
+
+    // TODO refactor the path
     @PostMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID + RESTNouns.AUTO)
-    public @ResponseBody Auto createAutoByCustomer(
+    public @ResponseBody Auto createAutoByCustomerID(
             @PathVariable("id") Long customerId,
             @RequestParam String make,
             @RequestParam String model,
@@ -678,8 +687,10 @@ public class MainController {
      * @param autoId The unique identifier of the auto to be updated
      * @return A string message indicating the result of the update operation
      */
+
+    // TODO refactor the path and method to only be by auto ID
     @PutMapping(path = RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID + RESTNouns.AUTO + RESTNouns.AUTO_ID)
-    public @ResponseBody String updateAutoByCustomer(
+    public @ResponseBody String updateAutoByCustomerId(
             @PathVariable("customer_id") Long userId,
             @PathVariable("auto_id") Long autoId,
             @RequestParam String make,
@@ -708,8 +719,10 @@ public class MainController {
      * @param autoId The unique identifier of the auto to be deleted
      * @return A string message indicating the result of the deletion operation
      */
+
+    // TODO refactor the path and method to only be by auto ID
     @DeleteMapping(path = RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID + RESTNouns.AUTO + RESTNouns.AUTO_ID)
-    public @ResponseBody String deleteAutoByCustomer(
+    public @ResponseBody String deleteAutoByCustomerId(
             @PathVariable("customer_id") Long customerId, @PathVariable("auto_id") Long autoId) {
         if (customerRepository.existsById(customerId) && autoRepository.existsById(autoId)) {
             autoRepository.deleteById(autoId);
@@ -733,7 +746,7 @@ public class MainController {
         }
 
     @PostMapping(path = RESTNouns.ACCIDENT + RESTNouns.CUSTOMER_ID)
-        public @ResponseBody Accident createAccidentByCustomer(
+        public @ResponseBody Accident createAccidentByCustomerId(
                 @PathVariable("customer_id") Long customerId,
                 @RequestParam LocalDate dateOfAccident) {
             Accident accident = null;
@@ -810,7 +823,7 @@ public class MainController {
     }
 
     @PostMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.HOME_ID)
-    public @ResponseBody HomeQuote createHomeQuoteByCustomer(
+    public @ResponseBody HomeQuote createHomeQuoteByCustomerAndHomeId(
             @PathVariable("customer_id") Long customerId,
             @PathVariable("home_id") Long homeId,
             @RequestParam int liability,
@@ -869,7 +882,7 @@ public class MainController {
         return quote;
     }
 
-
+    // TODO Uodate path to use only quote ID
     @PutMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.QUOTE_ID)
     public @ResponseBody String updateHomeQuoteByCustomer(
             @PathVariable("customer_id") Long customerId,
@@ -921,7 +934,7 @@ public class MainController {
     }
 
     @PostMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.AUTO_ID)
-    public @ResponseBody AutoQuote createAutoQuoteByCustomer(
+    public @ResponseBody AutoQuote createAutoQuoteByCustomerAndAutoId(
             @PathVariable("customer_id") Long customerId,
             @PathVariable("auto_id") Long autoId,
             @RequestParam boolean packagedQuote) {
@@ -980,6 +993,7 @@ public class MainController {
         return quote;
     }
 
+    // TODO Uodate path to use only quote ID
     @PutMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.QUOTE_ID)
     public @ResponseBody String updateAutoQuoteByCustomer(
             @PathVariable("customer_id") Long customerId,
@@ -1031,7 +1045,7 @@ public class MainController {
     }
 
     @PostMapping(path = RESTNouns.HOME_POLICY + RESTNouns.QUOTE_ID)
-    public @ResponseBody HomePolicy createHomePolicyByHomeQuote(
+    public @ResponseBody HomePolicy createHomePolicyByHomeQuoteId(
             @PathVariable("quote_id") Long quoteId,
             @RequestParam LocalDate effectiveDate) {
         Optional<HomeQuote> quoteOptional = homeQuoteRepository.findById(quoteId);
@@ -1052,6 +1066,7 @@ public class MainController {
         return policy;
     }
 
+    // TODO Update to use only policy ID
     @PutMapping(path = RESTNouns.HOME_POLICY + RESTNouns.CUSTOMER_ID + RESTNouns.POLICY_ID)
     public @ResponseBody String updateHomePolicyByCustomer(
             @PathVariable("customer_id") Long customerId,
