@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.springframework.http.HttpStatus;
 
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.Period;
@@ -67,7 +66,7 @@ public class MainController {
      * @param password       The plain-text password to be hashed and stored.
      * @return A JSON response indicating success or failure.
      */
-    @PostMapping(path = RESTNouns.CUSTOMER + RESTNouns.ADDRESS_ID)
+    @PostMapping(path = RESTNouns.CUSTOMER + RESTNouns.REGISTER + RESTNouns.ADDRESS_ID)
     public ResponseEntity<Map<String, Object>> createCustomer(
             @PathVariable("address_id") Long addressId,
             @RequestParam String firstName,
@@ -109,7 +108,7 @@ public class MainController {
      * @param password The plain-text password to validate.
      * @return A JSON response indicating login success or failure.
      */
-    @PostMapping(path = RESTNouns.CUSTOMER)
+    @PostMapping(path = RESTNouns.CUSTOMER + RESTNouns.LOGIN)
     public ResponseEntity<Map<String, Object>> loginCustomer(
             @RequestParam String username,
             @RequestParam String password
@@ -166,17 +165,16 @@ public class MainController {
             @RequestParam String lastName,
             @RequestParam LocalDate birthday,
             @RequestParam String email,
-            @RequestParam String username,
-            @RequestParam String password){
-        if (customerRepository.existsById(customerId)) {
+            @RequestParam Long addressId){
+        if (customerRepository.existsById(customerId) && addressRepository.existsById(addressId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
-            if(customer.isPresent()){
+            Optional<Address> address = addressRepository.findById(addressId);
+            if(customer.isPresent() && address.isPresent()){
                 customer.get().setFirstName(firstName);
                 customer.get().setLastName(lastName);
                 customer.get().setBirthday(birthday);
                 customer.get().setEmail(email);
-                customer.get().setUsername(username);
-                customer.get().setPassword(password);
+                customer.get().setAddress(address.get());
                 customerRepository.save(customer.get());
             }
             return "Customer with ID " + customerId + " updated successfully.";
@@ -201,8 +199,35 @@ public class MainController {
         }
     }
 
+    @PutMapping(path = RESTNouns.CUSTOMER + RESTNouns.RESET + RESTNouns.ID)
+    public ResponseEntity<Map<String, Object>> resetCustomerPassword(
+            @PathVariable("id") Long customerId,
+            @RequestParam String oldPassword,
+            @RequestParam String newPassword
+    ) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Customer> customerOptional = customerRepository.findById(customerId);
+        if (customerOptional.isPresent()) {
+            Customer customer = customerOptional.get();
+            if (passwordEncryptor.checkPassword(oldPassword, customer.getPassword())) {
+                customer.setPassword(passwordEncryptor.encryptPassword(newPassword));
+                customerRepository.save(customer);
+                response.put("success", true);
+                response.put("message", "Customer password updated successfully.!");
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                response.put("success", false);
+                response.put("message", "Invalid credentials.");
+                return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+            }
+        }
+        response.put("success", false);
+        response.put("message", "Account not found.");
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
     /* *
-            EMPLOYEE METHODS
+     *  EMPLOYEE METHODS
      * */
 
     /**
@@ -214,10 +239,202 @@ public class MainController {
     public @ResponseBody Iterable<Employee> getAllEmployees() {
         return employeeRepository.findAll();
     }
+    @PostMapping(path = RESTNouns.EMPLOYEE + RESTNouns.LOGIN)
+    public ResponseEntity<Map<String, Object>> loginEmployee(
+            @RequestParam String username,
+            @RequestParam String password
+    ) {
+        Map<String, Object> response = new HashMap<>();
+        Employee employee = employeeRepository.findByUsername(username);
+
+        if (employee != null && passwordEncryptor.checkPassword(password, employee.getPassword())) {
+            response.put("message", "Login successful!");
+            response.put("employeeId", employee.getId());
+            response.put("username", employee.getUsername());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.put("success", false);
+            response.put("message", "Invalid credentials.");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    /**
+     * Updates an existing customer's information.
+     *
+     * @param employeeId The unique identifier of the user to update
+     * @return A string message indicating the result of the update operation
+     */
+    @PutMapping(path = RESTNouns.EMPLOYEE + RESTNouns.ID)
+    public @ResponseBody String updateEmployeeName(
+            @PathVariable("id") Long employeeId,
+            @RequestParam String firstName,
+            @RequestParam String lastName){
+        if (employeeRepository.existsById(employeeId)) {
+            Optional<Employee> employee = employeeRepository.findById(employeeId);
+            if(employee.isPresent()){
+                employee.get().setFirstName(firstName);
+                employee.get().setLastName(lastName);
+                employeeRepository.save(employee.get());
+            }
+            return "Employee with ID " + employeeId + " updated successfully.";
+        } else {
+            return "Employee with ID " + employeeId + " not found.";
+        }
+    }
+
+    /**
+     * Updates an existing customer's information.
+     *
+     * @param customerId The unique identifier of the user to update
+     * @return A string message indicating the result of the update operation
+     */
+    @PutMapping(path = RESTNouns.EMPLOYEE + RESTNouns.CUSTOMER + RESTNouns.ID)
+    public @ResponseBody String employeeUpdateCustomer(
+            @PathVariable("id") Long customerId,
+            @RequestParam String firstName,
+            @RequestParam String lastName,
+            @RequestParam LocalDate birthday,
+            @RequestParam String email,
+            @RequestParam Long addressId,
+            @RequestParam String username,
+            @RequestParam String password){
+        if (customerRepository.existsById(customerId) && addressRepository.existsById(addressId)) {
+            Optional<Customer> customer = customerRepository.findById(customerId);
+            Optional<Address> address = addressRepository.findById(addressId);
+            if(customer.isPresent() && address.isPresent()){
+                customer.get().setFirstName(firstName);
+                customer.get().setLastName(lastName);
+                customer.get().setBirthday(birthday);
+                customer.get().setEmail(email);
+                customer.get().setAddress(address.get());
+                customer.get().setUsername(username);
+                customer.get().setPassword(passwordEncryptor.encryptPassword(password));
+                customerRepository.save(customer.get());
+            }
+            return "Customer with ID " + customerId + " updated successfully.";
+        } else {
+            return "Customer with ID " + customerId + " not found.";
+        }
+    }
+
+    @PutMapping(path = RESTNouns.EMPLOYEE + RESTNouns.RESET + RESTNouns.ID)
+    public ResponseEntity<Map<String, Object>> resetEmployeePassword(
+            @PathVariable("id") Long employeeId,
+            @RequestParam String oldPassword,
+            @RequestParam String newPassword
+    ) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Employee> employeeOptional = employeeRepository.findById(employeeId);
+        if (employeeOptional.isPresent()) {
+            Employee employee = employeeOptional.get();
+            if (passwordEncryptor.checkPassword(oldPassword, employee.getPassword())) {
+                employee.setPassword(passwordEncryptor.encryptPassword(newPassword));
+                employeeRepository.save(employee);
+                response.put("success", true);
+                response.put("message", "Employee password updated successfully.!");
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                response.put("success", false);
+                response.put("message", "Invalid credentials.");
+                return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+            }
+        }
+        response.put("success", false);
+        response.put("message", "Account not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    /* *
+     *  ADMIN METHODS
+     * */
+
+    /**
+     * Registers a new employee account. The password is securely hashed before being saved.
+     *
+     * @param email          The customer's email address.
+     * @param username       The desired username for the employee account.
+     * @param password       The plain-text password to be hashed and stored.
+     * @return A JSON response indicating success or failure.
+     */
+    @PostMapping(path = RESTNouns.ADMIN + RESTNouns.REGISTER)
+    public ResponseEntity<Map<String, Object>> adminCreateEmployee(
+            @RequestParam String firstName,
+            @RequestParam String lastName,
+            @RequestParam String email,
+            @RequestParam String username,
+            @RequestParam String password
+    ) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (employeeRepository.existsByUsername(username)) {
+            response.put("success", false);
+            response.put("message", "Username already exists. Please choose a new username.");
+            return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+        }
+
+        Employee employee = new Employee();
+        employee.setFirstName(firstName);
+        employee.setLastName(lastName);
+        employee.setEmail(email);
+        employee.setUsername(username);
+        employee.setPassword(passwordEncryptor.encryptPassword(password));
+
+        employeeRepository.save(employee);
+
+        response.put("success", true);
+        response.put("message", "Employee registration successful!");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     * Updates an existing customer's information.
+     *
+     * @param employeeId The unique identifier of the user to update
+     * @return A string message indicating the result of the update operation
+     */
+    @PutMapping(path = RESTNouns.ADMIN + RESTNouns.ID)
+    public @ResponseBody String adminUpdateEmployee(
+            @PathVariable("id") Long employeeId,
+            @RequestParam String firstName,
+            @RequestParam String lastName,
+            @RequestParam String email,
+            @RequestParam String username,
+            @RequestParam String password){
+        if (employeeRepository.existsById(employeeId)) {
+            Optional<Employee> employee = employeeRepository.findById(employeeId);
+            if(employee.isPresent()){
+                employee.get().setFirstName(firstName);
+                employee.get().setLastName(lastName);
+                employee.get().setEmail(email);
+                employee.get().setUsername(username);
+                employee.get().setPassword(passwordEncryptor.encryptPassword(password));
+                employeeRepository.save(employee.get());
+            }
+            return "Employee with ID " + employeeId + " updated successfully.";
+        } else {
+            return "Employee with ID " + employeeId + " not found.";
+        }
+    }
+
+    /**
+     * Deletes a customer from the database by their unique identifier.
+     *
+     * @param employeeId The unique identifier of the user to delete
+     * @return A string message indicating the result of the deletion operation
+     */
+    @DeleteMapping(path = RESTNouns.ADMIN + RESTNouns.ID)
+    public @ResponseBody String adminDeleteEmployee(@PathVariable("id") Long employeeId) {
+        if (employeeRepository.existsById(employeeId)) {
+            employeeRepository.deleteById(employeeId);
+            return "Employee with ID " + employeeId + " deleted successfully.";
+        } else {
+            return "Employee with ID " + employeeId + " not found.";
+        }
+    }
 
     /* *
      *  HOME METHODS
-     *
      * */
 
     /**
@@ -336,7 +553,7 @@ public class MainController {
     }
 
     /* *
-    * ADDRESS METHODS
+    *   ADDRESS METHODS
     * */
 
     @GetMapping(path = RESTNouns.ADDRESS)

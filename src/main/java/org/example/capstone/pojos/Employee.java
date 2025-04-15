@@ -12,11 +12,13 @@ public class Employee extends User {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer id;
-    private String name;
+    private String firstName;
+    private String lastName;
     private String email;
     private String username;
     // @JsonIgnore //hides from json / removable if necessary
     private String password;
+    private boolean admin = false;
 
     public Integer getId() {
         return id;
@@ -26,20 +28,20 @@ public class Employee extends User {
         this.id = id;
     }
 
-    /**
-     * Get the name
-     * @return name
-     */
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    /**
-     * Set the name
-     * @param name name
-     */
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     /**
@@ -72,5 +74,13 @@ public class Employee extends User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 }

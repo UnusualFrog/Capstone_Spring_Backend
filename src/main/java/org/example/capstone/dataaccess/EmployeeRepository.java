@@ -1,5 +1,6 @@
 package org.example.capstone.dataaccess;
 
+import org.example.capstone.pojos.Customer;
 import org.example.capstone.pojos.Employee;
 import org.example.capstone.pojos.Home;
 import org.springframework.data.repository.CrudRepository;
@@ -15,4 +16,6 @@ public interface EmployeeRepository extends CrudRepository<Employee, Long> {
      * @return
      */
     Iterable<Home> getAllEmployeesById(Long employeeId);
+    boolean existsByUsername(String username);
+    Employee findByUsername(String username);
 }
