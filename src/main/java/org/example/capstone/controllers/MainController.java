@@ -474,11 +474,11 @@ public class MainController {
         if (employeeRepository.existsById(employeeId)) {
             employeeRepository.deleteById(employeeId);
             response.put("success", true);
-            response.put("message", "Employee with ID " + employeeId + " deleted successfully.");
+            response.put("message", "Employee with ID " + employeeId + " deleted successfully");
             return new ResponseEntity<>(response, HttpStatus.GONE);
         } else {
             response.put("success", false);
-            response.put("message", "Employee with ID " + employeeId + " not found.");
+            response.put("message", "Employee with ID " + employeeId + " not found");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
@@ -486,6 +486,15 @@ public class MainController {
     /* *
      *  HOME METHODS
      * */
+
+    @GetMapping(path = RESTNouns.HOME)
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomes() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All homes retrieved");
+        response.put("object", homeRepository.findAll());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     /**
      * Retrieves all homes associated with a specific customer.
@@ -660,7 +669,7 @@ public class MainController {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", "Address created successfully");
-//        response.put("object", address);
+        response.put("object", address);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -712,6 +721,15 @@ public class MainController {
     /* *
      *  AUTO METHODS
      * */
+
+    @GetMapping(path = RESTNouns.AUTO)
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllAutos() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All autos retrieved");
+        response.put("object", autoRepository.findAll());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     /**
      * Retrieves all auto objects associated with a specific user.
@@ -1229,6 +1247,8 @@ public class MainController {
             policy.setCustId(quote.getCustId());
             policy.setBasePremium(quote.getBasePremium());
             homePolicyRepository.save(policy);
+            quote.setActive(false);
+            homeQuoteRepository.save(quote);
             response.put("success", true);
             response.put("message", "Home Policy created successfully");
 //            response.put("object", policy);
@@ -1240,7 +1260,7 @@ public class MainController {
     }
 
     @PutMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ID)
-    public @ResponseBody ResponseEntity<Map<String, Object>> updateHomePolicyByCustomer(
+    public @ResponseBody ResponseEntity<Map<String, Object>> updateHomePolicyById(
             @PathVariable("id") Long policyId,
             @RequestParam boolean activeStatus,
             @RequestParam LocalDate endDate){
@@ -1324,6 +1344,8 @@ public class MainController {
             policy.setCustId(quote.getCustId());
             policy.setBasePremium(quote.getBasePremium());
             autoPolicyRepository.save(policy);
+            quote.setActive(false);
+            autoQuoteRepository.save(quote);
             response.put("success", true);
             response.put("message", "Auto Policy created successfully");
 //            response.put("object", policy);
