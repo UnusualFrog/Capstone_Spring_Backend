@@ -42,7 +42,6 @@ public class RiskFactorConfig {
                 String fileContent = contentBuilder.toString();
                 riskFactors = (RiskFactors) xstream.fromXML(fileContent);
                 System.out.println("Success: Config File '" + myObj.getName() + "' loaded.");
-                System.out.println(riskFactors.getAutoBasePremium());
             }
         } catch (IOException e) {
             System.out.println("Error: Config File could not be created or loaded.");

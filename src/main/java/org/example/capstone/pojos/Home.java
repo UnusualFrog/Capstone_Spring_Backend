@@ -114,6 +114,14 @@ public class Home {
         /**
          * Other Heating
          */
+        ELECTRIC_HEATING,
+        /**
+         * Other Heating
+         */
+        GAS_HEATING,
+        /**
+         * Other Heating
+         */
         OTHER_HEATING
     }
 

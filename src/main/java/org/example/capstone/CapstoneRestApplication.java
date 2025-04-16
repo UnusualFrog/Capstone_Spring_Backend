@@ -9,5 +9,4 @@ public class CapstoneRestApplication {
     public static void main(String[] args) {
         SpringApplication.run(CapstoneRestApplication.class, args);
     }
-
 }

@@ -1,5 +1,6 @@
 package org.example.capstone.controllers;
 
+import com.thoughtworks.xstream.XStream;
 import org.example.capstone.dataaccess.*;
 import org.example.capstone.pojos.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.springframework.http.HttpStatus;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.Period;
@@ -39,11 +43,7 @@ public class MainController {
     @Autowired private AddressRepository addressRepository;
     @Autowired private RiskFactors riskFactors;
 
-    // TODO Create a method of storing, adjusting, and loading risk factor as variables or properties.
-    private double taxRate = 0.15;
-    private double baseAutoPremium = 750;
-    private double baseHomePremium = 500;
-    private DecimalFormat decimalFormatter = new DecimalFormat("#.##");
+    private final DecimalFormat decimalFormatter = new DecimalFormat("#.##");
 
     /* *
      *  CUSTOMER METHODS
@@ -58,10 +58,10 @@ public class MainController {
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllCustomers() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All customers retrieved");
+        response.put("message", "All customers retrieved!");
         response.put("object", customerRepository.findAll());
         System.out.println(riskFactors.getAutoBasePremium());
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
@@ -74,9 +74,9 @@ public class MainController {
     public @ResponseBody ResponseEntity<Map<String, Object>> getCustomerById(@PathVariable("id") Long customerId) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All customers with the ID " + customerId + " retrieved");
+        response.put("message", "Customer with the ID " + customerId + " retrieved!");
         response.put("object", customerRepository.findById(customerId));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = RESTNouns.CUSTOMER + RESTNouns.NAME)
@@ -85,9 +85,9 @@ public class MainController {
             @RequestParam String lastName) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All customers named " + firstName + " " + lastName + " retrieved");
+        response.put("message", "All customers named " + firstName + " " + lastName + " retrieved!");
         response.put("object", customerRepository.getAllCustomersByFirstNameAndLastName(firstName, lastName));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = RESTNouns.CUSTOMER + RESTNouns.EMAIL)
@@ -95,9 +95,9 @@ public class MainController {
             @RequestParam String email) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All customers with the email " + email + " retrieved");
+        response.put("message", "All customers with the email " + email + " retrieved!");
         response.put("object", customerRepository.getAllCustomersByEmail(email));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
@@ -197,7 +197,7 @@ public class MainController {
                     customerRepository.save(customer.get());
                 }
                 response.put("success", true);
-                response.put("message", "Customer with ID " + customerId + " updated successfully.");
+                response.put("message", "Customer with ID " + customerId + " updated successfully!");
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             response.put("success", false);
@@ -222,7 +222,7 @@ public class MainController {
                 customer.setPassword(passwordEncryptor.encryptPassword(newPassword));
                 customerRepository.save(customer);
                 response.put("success", true);
-                response.put("message", "Customer password updated successfully.!");
+                response.put("message", "Customer password updated successfully!");
                 return new ResponseEntity<>(response, HttpStatus.OK);
             } else {
                 response.put("success", false);
@@ -247,8 +247,8 @@ public class MainController {
         if (customerRepository.existsById(customerId)) {
             customerRepository.deleteById(customerId);
             response.put("success", true);
-            response.put("message", "Customer with ID " + customerId + " deleted successfully.");
-            return new ResponseEntity<>(response, HttpStatus.GONE);
+            response.put("message", "Customer with ID " + customerId + " deleted successfully!");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             response.put("success", true);
             response.put("message", "Customer with ID " + customerId + " not found.");
@@ -269,9 +269,9 @@ public class MainController {
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllEmployees() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All employees retrieved");
+        response.put("message", "All employees retrieved!");
         response.put("object", employeeRepository.findAll());
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping(path = RESTNouns.EMPLOYEE + RESTNouns.LOGIN)
@@ -312,7 +312,7 @@ public class MainController {
                 employeeRepository.save(employee.get());
             }
             response.put("success", true);
-            response.put("message", "Employee with ID " + employeeId + " updated successfully.");
+            response.put("message", "Employee with ID " + employeeId + " updated successfully!");
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             response.put("success", false);
@@ -352,7 +352,7 @@ public class MainController {
                 customerRepository.save(customer.get());
             }
             response.put("success", true);
-            response.put("message", "Customer with ID " + customerId + " updated successfully.");
+            response.put("message", "Customer with ID " + customerId + " updated successfully!");
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             response.put("success", false);
@@ -374,7 +374,7 @@ public class MainController {
                 employee.setPassword(passwordEncryptor.encryptPassword(newPassword));
                 employeeRepository.save(employee);
                 response.put("success", true);
-                response.put("message", "Employee password updated successfully.!");
+                response.put("message", "Employee password updated successfully!");
                 return new ResponseEntity<>(response, HttpStatus.OK);
             } else {
                 response.put("success", false);
@@ -395,9 +395,9 @@ public class MainController {
     public @ResponseBody ResponseEntity<Map<String, Object>> adminGetRiskFactors() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All riskFactors retrieved");
+        response.put("message", "All risk factors retrieved!");
         response.put("object", riskFactors);
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
@@ -463,7 +463,7 @@ public class MainController {
                 employeeRepository.save(employee.get());
             }
             response.put("success", true);
-            response.put("message", "Employee with ID " + employeeId + " updated successfully.");
+            response.put("message", "Employee with ID " + employeeId + " updated successfully!");
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             response.put("success", false);
@@ -475,9 +475,25 @@ public class MainController {
     @PutMapping(path = RESTNouns.ADMIN + RESTNouns.RISK)
     public @ResponseBody ResponseEntity<Map<String, Object>> adminUpdateRiskFactors(@RequestBody RiskFactors rf) {
         Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", rf.getHomeValueBaseLine());
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        String pathName = ".\\src\\main\\java\\org\\example\\capstone\\config\\risk_factor_config.xml";
+        File myObj = new File(pathName);
+        try {
+            riskFactors = rf;
+            XStream xstream = new XStream();
+            xstream.allowTypesByWildcard(new String[]{"org.example.capstone.**"});
+            FileWriter myWriter = new FileWriter(pathName);
+            String dataXml = xstream.toXML(riskFactors);
+            myWriter.write(dataXml);
+            myWriter.close();
+            response.put("success", true);
+            response.put("message", "Config File '" + myObj.getName() + "' updated!");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        response.put("success", false);
+        response.put("message", "Config File '" + myObj.getName() + "' could not be updated.");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -492,11 +508,11 @@ public class MainController {
         if (employeeRepository.existsById(employeeId)) {
             employeeRepository.deleteById(employeeId);
             response.put("success", true);
-            response.put("message", "Employee with ID " + employeeId + " deleted successfully");
-            return new ResponseEntity<>(response, HttpStatus.GONE);
+            response.put("message", "Employee with ID " + employeeId + " deleted successfully!");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             response.put("success", false);
-            response.put("message", "Employee with ID " + employeeId + " not found");
+            response.put("message", "Employee with ID " + employeeId + " not found.");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
@@ -509,7 +525,7 @@ public class MainController {
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomes() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All homes retrieved");
+        response.put("message", "All homes retrieved!");
         response.put("object", homeRepository.findAll());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -528,9 +544,9 @@ public class MainController {
             Optional<Customer> customer = customerRepository.findById(customerId);
             if(customer.isPresent()){
                 response.put("success", true);
-                response.put("message", "All homes of customer ID "+ customerId +" retrieved");
+                response.put("message", "All homes of customer ID "+ customerId +" retrieved!");
                 response.put("object", homeRepository.getAllHomesByCustomer(customer.get()));
-                return new ResponseEntity<>(response, HttpStatus.FOUND);
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
         response.put("success", false);
@@ -570,7 +586,7 @@ public class MainController {
                 address.ifPresent(home::setAddress);
                 homeRepository.save(home);
                 response.put("success", true);
-                response.put("message", "Home created successfully.");
+                response.put("message", "Home created successfully!");
                 response.put("object", home);
                 return new ResponseEntity<>(response, HttpStatus.CREATED);
             }
@@ -617,7 +633,7 @@ public class MainController {
                 }
             }
             response.put("success", true);
-            response.put("message", "Home with ID " + homeId + " updated successfully.");
+            response.put("message", "Home with ID " + homeId + " updated successfully!");
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             response.put("success", false);
@@ -639,8 +655,8 @@ public class MainController {
         if (homeRepository.existsById(homeId)) {
             homeRepository.deleteById(homeId);
             response.put("success", true);
-            response.put("message", "Home with ID " + homeId + " deleted successfully.");
-            return new ResponseEntity<>(response, HttpStatus.GONE);
+            response.put("message", "Home with ID " + homeId + " deleted successfully!");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             response.put("success", false);
             response.put("message", "Home with ID " + homeId + " not found.");
@@ -656,18 +672,18 @@ public class MainController {
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllAddresses() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All addresses retrieved");
+        response.put("message", "All addresses retrieved!");
         response.put("object", addressRepository.findAll());
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = RESTNouns.ADDRESS + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAddressById(@PathVariable("id") Long addressId) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "Address with ID "+ addressId +" retrieved");
+        response.put("message", "Address with ID "+ addressId +" retrieved!");
         response.put("object", addressRepository.findById(addressId));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping(path = RESTNouns.ADDRESS)
@@ -686,7 +702,7 @@ public class MainController {
         addressRepository.save(address);
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "Address created successfully");
+        response.put("message", "Address created successfully!");
         response.put("object", address);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -711,7 +727,7 @@ public class MainController {
                     addressRepository.save(address.get());
                 }
                 response.put("success", true);
-                response.put("message", "Address with ID " + addressId + " updated successfully.");
+                response.put("message", "Address with ID " + addressId + " updated successfully!");
                 return new ResponseEntity<>(response, HttpStatus.OK);
             } else {
                 response.put("success", false);
@@ -727,8 +743,8 @@ public class MainController {
         if (addressRepository.existsById(addressId)) {
             addressRepository.deleteById(addressId);
             response.put("success", true);
-            response.put("message", "Address with ID " + addressId + " deleted successfully.");
-            return new ResponseEntity<>(response, HttpStatus.GONE);
+            response.put("message", "Address with ID " + addressId + " deleted successfully!");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             response.put("success", false);
             response.put("message", "Address with ID " + addressId + " not found.");
@@ -744,7 +760,7 @@ public class MainController {
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllAutos() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All autos retrieved");
+        response.put("message", "All autos retrieved!");
         response.put("object", autoRepository.findAll());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -764,9 +780,9 @@ public class MainController {
             Optional<Customer> customer = customerRepository.findById(customerId);
             if(customer.isPresent()){
                 response.put("success", true);
-                response.put("message", "All autos with customer ID "+ customerId +" retrieved");
+                response.put("message", "All autos with customer ID "+ customerId +" retrieved!");
                 response.put("object", autoRepository.getAllByCustomerId(customerId));
-                return new ResponseEntity<>(response, HttpStatus.FOUND);
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
         response.put("success", false);
@@ -798,7 +814,7 @@ public class MainController {
                 auto.setCustomer(customer.get());
                 autoRepository.save(auto);
                 response.put("success", true);
-                response.put("message", "Auto created successfully");
+                response.put("message", "Auto created successfully!");
 //                response.put("object", auto);
                 return new ResponseEntity<>(response, HttpStatus.CREATED);
             }
@@ -853,7 +869,7 @@ public class MainController {
             autoRepository.deleteById(autoId);
             response.put("success", true);
             response.put("message", "Auto with ID " + autoId + " deleted successfully.");
-            return new ResponseEntity<>(response, HttpStatus.GONE);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         response.put("success", false);
         response.put("message", "Auto with ID " + autoId + " not found.");
@@ -867,18 +883,18 @@ public class MainController {
         public @ResponseBody ResponseEntity<Map<String, Object>> getAllAccidents() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All accidents retrieved");
+        response.put("message", "All accidents retrieved!");
         response.put("object", accidentsRepository.findAll());
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
     @GetMapping(path = RESTNouns.ACCIDENT + RESTNouns.ID)
         public @ResponseBody ResponseEntity<Map<String, Object>> getAccidentById(@PathVariable("id") Long accidentID) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All accidents with ID "+ accidentID +" retrieved");
+        response.put("message", "All accidents with ID "+ accidentID +" retrieved!");
         response.put("object", accidentsRepository.findById(accidentID));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
     @PostMapping(path = RESTNouns.ACCIDENT + RESTNouns.ID)
@@ -894,7 +910,7 @@ public class MainController {
                     accident.setDate(dateOfAccident);
                     accidentsRepository.save(accident);
                     response.put("success", true);
-                    response.put("message", "Accident created successfully");
+                    response.put("message", "Accident created successfully!");
 //                    response.put("object", accident);
                     return new ResponseEntity<>(response, HttpStatus.CREATED);
                 }
@@ -916,7 +932,7 @@ public class MainController {
                 accidentsRepository.save(accident.get());
             }
             response.put("success", true);
-            response.put("message", "Accident with ID " + accidentId + " updated successfully.");
+            response.put("message", "Accident with ID " + accidentId + " updated successfully!");
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         response.put("success", false);
@@ -931,8 +947,8 @@ public class MainController {
         if (accidentsRepository.existsById(accidentId)) {
             accidentsRepository.deleteById(accidentId);
             response.put("success", true);
-            response.put("message", "Accident with ID " + accidentId + " deleted successfully.");
-            return new ResponseEntity<>(response, HttpStatus.GONE);
+            response.put("message", "Accident with ID " + accidentId + " deleted successfully!");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         response.put("success", false);
         response.put("message", "Accident with ID " + accidentId + " not found.");
@@ -952,36 +968,36 @@ public class MainController {
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomeQuotes() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All home quotes retrieved");
+        response.put("message", "All home quotes retrieved!");
         response.put("object", homeQuoteRepository.findAll());
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getHomeQuoteById(@PathVariable("id") Long quoteID) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "Home quote with ID "+ quoteID +" retrieved");
+        response.put("message", "Home quote with ID "+ quoteID +" retrieved!");
         response.put("object", homeQuoteRepository.findById(quoteID));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.CUSTOMER + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomeQuotesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All home quotes with customer ID " + customerID + " retrieved");
+        response.put("message", "All home quotes with customer ID " + customerID + " retrieved!");
         response.put("object", homeQuoteRepository.getAllByCustId(customerID));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ACTIVE + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllActiveHomeQuotesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All active home quotes with customer ID " + customerID + " retrieved");
+        response.put("message", "All active home quotes with customer ID " + customerID + " retrieved!");
         response.put("object", homeQuoteRepository.getAllActiveByCustIdAndActive(customerID, true));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ID + RESTNouns.ADDITIONAL_ID)
@@ -999,47 +1015,59 @@ public class MainController {
                 int homeAge = Period.between(home.get().getDateBuilt(), today).getYears();
                 double factor = 1;
                 if (liability == 2000000) {
-                    factor *= 1.25;
+                    factor *= riskFactors.getHighLiability();
+                } else {
+                    factor *= riskFactors.getLowLiability();
                 }
                 if (homeAge > 50) {
-                    factor *= 1.5;
+                    factor *= riskFactors.getHomeOldAge();
                 } else if (homeAge > 25) {
-                    factor *= 1.25;
+                    factor *= riskFactors.getHomeMidAge();
+                } else {
+                    factor *= riskFactors.getHomeNewAge();
                 }
                 if (home.get().getHeatingType() == Home.HeatingType.OIL_HEATING) {
-                    factor *= 2;
+                    factor *= riskFactors.getHeatingOil();
                 } else if (home.get().getHeatingType() == Home.HeatingType.WOOD_HEATING) {
-                    factor *= 1.25;
+                    factor *= riskFactors.getHeatingWood();
+                } else if (home.get().getHeatingType() == Home.HeatingType.ELECTRIC_HEATING) {
+                    factor *= riskFactors.getHeatingElectric();
+                } else if (home.get().getHeatingType() == Home.HeatingType.GAS_HEATING) {
+                    factor *= riskFactors.getHeatingGas();
+                } else if (home.get().getHeatingType() == Home.HeatingType.OTHER_HEATING) {
+                    factor *= riskFactors.getHeatingOther();
                 }
                 if (home.get().getLocation() == Home.Location.RURAL) {
-                    factor *= 1.15;
+                    factor *= riskFactors.getRural();
+                } else {
+                    factor *= riskFactors.getUrban();
                 }
                 if (packagedQuote) {
-                    factor *= 0.9;
+                    factor *= riskFactors.getDiscountForBoth();
                 } else if (autoPolicyRepository.getAllByCustId(customerId).iterator().hasNext()) {
                     double factorAdjust = 1;
                     for (AutoPolicy policy : autoPolicyRepository.getAllByCustId(customerId)) {
                         if (policy.getActive()) {
-                            factorAdjust = 0.9;
+                            factorAdjust = riskFactors.getDiscountForBoth();
                             break;
                         }
                     }
                     factor *= factorAdjust;
                 }
-                double addPremium = (home.get().getHomeValue() > 250000) ? home.get().getHomeValue() * 0.002 : 0;
-                double premium = (baseHomePremium + addPremium) * factor * (taxRate + 1);
+                double addPremium = (home.get().getHomeValue() > riskFactors.getHomeValueBaseLine()) ? home.get().getHomeValue() * riskFactors.getHomeValuePercentage() : 0;
+                double premium = (riskFactors.getHomeBasePremium() + addPremium) * factor * (riskFactors.getTaxRate() + 1);
                 premium = Double.parseDouble(decimalFormatter.format(premium));
                 HomeQuote quote = new HomeQuote();
                 quote.setPremium(premium);
                 quote.setGenerationDate(today);
                 quote.setLiabilityLimit(liability);
-                quote.setTaxRate(taxRate);
+                quote.setTaxRate(riskFactors.getTaxRate());
                 quote.setHome(home.get());
-                quote.setBasePremium(baseHomePremium);
+                quote.setBasePremium(riskFactors.getHomeBasePremium());
                 quote.setCustId(customer.get().getId());
                 homeQuoteRepository.save(quote);
                 response.put("success", true);
-                response.put("message", "Home Quote created successfully");
+                response.put("message", "Home Quote created successfully!");
 //                response.put("object", quote);
                 return new ResponseEntity<>(response, HttpStatus.CREATED);
             }
@@ -1061,7 +1089,7 @@ public class MainController {
                 homeQuoteRepository.save(homeQuote.get());
             }
             response.put("success", true);
-            response.put("message", "Home Quote with ID " + quoteId + " updated successfully.");
+            response.put("message", "Home Quote with ID " + quoteId + " updated successfully!");
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         response.put("success", false);
@@ -1085,34 +1113,34 @@ public class MainController {
         response.put("success", true);
         response.put("message", "All auto quotes retrieved");
         response.put("object", autoQuoteRepository.findAll());
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAutoQuoteById(@PathVariable("id") Long quoteID) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "Auto quote with ID " + quoteID + " retrieved");
+        response.put("message", "Auto quote with ID " + quoteID + " retrieved!");
         response.put("object", autoQuoteRepository.findById(quoteID));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.CUSTOMER + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllAutoQuotesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All auto quotes with customer ID " + customerID + " retrieved");
+        response.put("message", "All auto quotes with customer ID " + customerID + " retrieved!");
         response.put("object", autoQuoteRepository.getAllByCustId(customerID));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ACTIVE + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllActiveAutoQuotesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All active auto quotes with customer ID " + customerID + " retrieved");
+        response.put("message", "All active auto quotes with customer ID " + customerID + " retrieved!");
         response.put("object", autoQuoteRepository.getAllActiveByCustIdAndActive(customerID, true));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ID + RESTNouns.ADDITIONAL_ID)
@@ -1129,7 +1157,9 @@ public class MainController {
                 int age = Period.between(customer.get().getBirthday(), today).getYears();
                 double factor = 1;
                 if (age < 25) {
-                    factor *= 2;
+                    factor *= riskFactors.getDriverYoung();
+                } else {
+                    factor *= riskFactors.getDriverOld();
                 }
                 int accidentCount = 0;
                 Iterable<Accident> accidents = accidentsRepository.getAllAccidentsByCustomer(customer.get());
@@ -1139,39 +1169,43 @@ public class MainController {
                     }
                 }
                 if (accidentCount > 1) {
-                    factor *= 2.5;
+                    factor *= riskFactors.getAccidentsMany();
                 } else if (accidentCount == 1) {
-                    factor *= 1.25;
+                    factor *= riskFactors.getAccidentsFew();
+                } else {
+                    factor *= riskFactors.getAccidentsNone();
                 }
                 if (today.getYear() - auto.get().getYear() > 10) {
-                    factor *= 2;
+                    factor *= riskFactors.getVehicleOld();
                 } else if (today.getYear() - auto.get().getYear() > 5) {
-                    factor *= 1.5;
+                    factor *= riskFactors.getVehicleMid();
+                } else {
+                    factor *= riskFactors.getVehicleNew();
                 }
                 if (packagedQuote) {
-                    factor *= 0.9;
+                    factor *= riskFactors.getDiscountForBoth();
                 } else if (homePolicyRepository.getAllByCustId(customerId).iterator().hasNext()) {
                     double factorAdjust = 1;
                     for (HomePolicy policy : homePolicyRepository.getAllByCustId(customerId)) {
                         if (policy.getActive()) {
-                            factorAdjust = 0.9;
+                            factorAdjust = riskFactors.getDiscountForBoth();
                             break;
                         }
                     }
                     factor *= factorAdjust;
                 }
-                double premium = baseAutoPremium * factor * (taxRate + 1);
+                double premium = riskFactors.getAutoBasePremium() * factor * (riskFactors.getTaxRate() + 1);
                 premium = Double.parseDouble(decimalFormatter.format(premium));
                 AutoQuote quote = new AutoQuote();
                 quote.setGenerationDate(today);
                 quote.setPremium(premium);
-                quote.setTaxRate(taxRate);
+                quote.setTaxRate(riskFactors.getTaxRate());
                 quote.setAuto(auto.get());
-                quote.setBasePremium(baseAutoPremium);
+                quote.setBasePremium(riskFactors.getAutoBasePremium());
                 quote.setCustId(customer.get().getId());
                 autoQuoteRepository.save(quote);
                 response.put("success", true);
-                response.put("message", "Auto Quote created successfully");
+                response.put("message", "Auto Quote created successfully!");
 //                response.put("object", quote);
                 return new ResponseEntity<>(response, HttpStatus.CREATED);
             }
@@ -1193,7 +1227,7 @@ public class MainController {
                 autoQuoteRepository.save(autoQuote.get());
             }
             response.put("success", true);
-            response.put("message", "Auto Quote with ID " + quoteId + " updated successfully.");
+            response.put("message", "Auto Quote with ID " + quoteId + " updated successfully!");
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         response.put("success", false);
@@ -1215,36 +1249,36 @@ public class MainController {
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomePolicies() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All home policies retrieved");
+        response.put("message", "All home policies retrieved!");
         response.put("object", homePolicyRepository.findAll());
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getHomePolicyById(@PathVariable("id") Long policyId) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "Home policy with ID " + policyId + " retrieved");
+        response.put("message", "Home policy with ID " + policyId + " retrieved.");
         response.put("object", homePolicyRepository.findById(policyId));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = RESTNouns.HOME_POLICY + RESTNouns.CUSTOMER + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomePoliciesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All home policies with customer ID " + customerID + " retrieved");
+        response.put("message", "All home policies with customer ID " + customerID + " retrieved!");
         response.put("object", homePolicyRepository.getAllByCustId(customerID));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ACTIVE + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllActiveHomePoliciesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All active home policies with customer ID " + customerID + " retrieved");
+        response.put("message", "All active home policies with customer ID " + customerID + " retrieved!");
         response.put("object", homePolicyRepository.getAllActiveByCustIdAndActive(customerID, true));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ID)
@@ -1268,7 +1302,7 @@ public class MainController {
             quote.setActive(false);
             homeQuoteRepository.save(quote);
             response.put("success", true);
-            response.put("message", "Home Policy created successfully");
+            response.put("message", "Home Policy created successfully!");
 //            response.put("object", policy);
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
@@ -1291,7 +1325,7 @@ public class MainController {
                 homePolicyRepository.save(homePolicy.get());
             }
             response.put("success", true);
-            response.put("message", "Home Policy with ID " + policyId + " updated successfully.");
+            response.put("message", "Home Policy with ID " + policyId + " updated successfully!");
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         response.put("success", false);
@@ -1313,36 +1347,36 @@ public class MainController {
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllAutoPolicies() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All auto policies retrieved");
+        response.put("message", "All auto policies retrieved!");
         response.put("object", autoPolicyRepository.findAll());
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAutoPolicyById(@PathVariable("id") Long policyId) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "Auto policy with ID " + policyId + " retrieved");
+        response.put("message", "Auto policy with ID " + policyId + " retrieved!");
         response.put("object", autoPolicyRepository.findById(policyId));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.CUSTOMER + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllAutoPoliciesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All auto policies with customer ID " + customerID + " retrieved");
+        response.put("message", "All auto policies with customer ID " + customerID + " retrieved!");
         response.put("object", autoPolicyRepository.getAllByCustId(customerID));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.ACTIVE + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllActiveAutoPoliciesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All active auto policies with customer ID " + customerID + " retrieved");
+        response.put("message", "All active auto policies with customer ID " + customerID + " retrieved!");
         response.put("object", autoPolicyRepository.getAllActiveByCustIdAndActive(customerID, true));
-        return new ResponseEntity<>(response, HttpStatus.FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.ID)
@@ -1365,7 +1399,7 @@ public class MainController {
             quote.setActive(false);
             autoQuoteRepository.save(quote);
             response.put("success", true);
-            response.put("message", "Auto Policy created successfully");
+            response.put("message", "Auto Policy created successfully!");
 //            response.put("object", policy);
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
@@ -1388,7 +1422,7 @@ public class MainController {
                 autoPolicyRepository.save(autoPolicy.get());
             }
             response.put("success", true);
-            response.put("message", "Auto Policy with ID " + policyId + " updated successfully.");
+            response.put("message", "Auto Policy with ID " + policyId + " updated successfully!");
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         response.put("success", false);
