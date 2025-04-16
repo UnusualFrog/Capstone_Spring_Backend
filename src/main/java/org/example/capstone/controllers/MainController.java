@@ -283,8 +283,7 @@ public class MainController {
 
         if (employee != null && passwordEncryptor.checkPassword(password, employee.getPassword())) {
             response.put("message", "Login successful!");
-            response.put("employeeId", employee.getId());
-            response.put("username", employee.getUsername());
+            response.put("object", employee);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             response.put("success", false);
@@ -478,7 +477,7 @@ public class MainController {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", rf.getHomeValueBaseLine());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
     /**
@@ -1172,7 +1171,7 @@ public class MainController {
                 quote.setCustId(customer.get().getId());
                 autoQuoteRepository.save(quote);
                 response.put("success", true);
-                response.put("message", "Home Quote created successfully");
+                response.put("message", "Auto Quote created successfully");
 //                response.put("object", quote);
                 return new ResponseEntity<>(response, HttpStatus.CREATED);
             }
