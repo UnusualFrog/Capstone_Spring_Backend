@@ -16,6 +16,7 @@ public class RESTNouns {
     public static final String RESET = "/reset";
     public static final String EMAIL = "/email";
     public static final String NAME = "/name";
+    public static final String RISK = "/risk";
     public static final String ID = "/{id}";
     public static final String ADDITIONAL_ID = "/{additional_id}";
 

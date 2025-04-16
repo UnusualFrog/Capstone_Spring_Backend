@@ -37,6 +37,7 @@ public class MainController {
     @Autowired private StrongPasswordEncryptor passwordEncryptor; //Choose x-www-form-urlencoded under BODY for register/login POSTS
     @Autowired private AccidentsRepository accidentsRepository;
     @Autowired private AddressRepository addressRepository;
+    @Autowired private RiskFactors riskFactors;
 
     // TODO Create a method of storing, adjusting, and loading risk factor as variables or properties.
     private double taxRate = 0.15;
@@ -59,6 +60,7 @@ public class MainController {
         response.put("success", true);
         response.put("message", "All customers retrieved");
         response.put("object", customerRepository.findAll());
+        System.out.println(riskFactors.getAutoBasePremium());
         return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
@@ -390,6 +392,15 @@ public class MainController {
      *  ADMIN METHODS
      * */
 
+    @GetMapping(path = RESTNouns.ADMIN + RESTNouns.RISK)
+    public @ResponseBody ResponseEntity<Map<String, Object>> adminGetRiskFactors() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All riskFactors retrieved");
+        response.put("object", riskFactors);
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
+    }
+
     /**
      * Registers a new employee account. The password is securely hashed before being saved.
      *
@@ -460,6 +471,14 @@ public class MainController {
             response.put("message", "Employee with ID " + employeeId + " not found.");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PutMapping(path = RESTNouns.ADMIN + RESTNouns.RISK)
+    public @ResponseBody ResponseEntity<Map<String, Object>> adminUpdateRiskFactors(@RequestBody RiskFactors rf) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", rf.getHomeValueBaseLine());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     /**
