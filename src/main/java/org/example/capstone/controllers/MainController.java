@@ -38,6 +38,7 @@ public class MainController {
     @Autowired private AccidentsRepository accidentsRepository;
     @Autowired private AddressRepository addressRepository;
 
+    // TODO Create a method of storing, adjusting, and loading risk factor as variables or properties.
     private double taxRate = 0.15;
     private double baseAutoPremium = 750;
     private double baseHomePremium = 500;
@@ -53,8 +54,48 @@ public class MainController {
      * @return An iterable collection of all User entities
      */
     @GetMapping(path = RESTNouns.CUSTOMER)
-    public @ResponseBody Iterable<Customer> getAllCustomers() {
-        return customerRepository.findAll();
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllCustomers() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All customers retrieved");
+        response.put("object", customerRepository.findAll());
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
+    }
+
+    /**
+     * Retrieves a specific user by their unique identifier.
+     *
+     * @param customerId The unique identifier of the user to retrieve
+     * @return An Optional containing the User if found, or an empty Optional
+     */
+    @GetMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> getCustomerById(@PathVariable("id") Long customerId) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All customers with the ID " + customerId + " retrieved");
+        response.put("object", customerRepository.findById(customerId));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
+    }
+
+    @GetMapping(path = RESTNouns.CUSTOMER + RESTNouns.NAME)
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllCustomersUsingName(
+            @RequestParam String firstName,
+            @RequestParam String lastName) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All customers named " + firstName + " " + lastName + " retrieved");
+        response.put("object", customerRepository.getAllCustomersByFirstNameAndLastName(firstName, lastName));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
+    }
+
+    @GetMapping(path = RESTNouns.CUSTOMER + RESTNouns.EMAIL)
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllCustomersUsingEmail(
+            @RequestParam String email) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All customers with the email " + email + " retrieved");
+        response.put("object", customerRepository.getAllCustomersByEmail(email));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
     /**
@@ -66,17 +107,15 @@ public class MainController {
      * @param password       The plain-text password to be hashed and stored.
      * @return A JSON response indicating success or failure.
      */
-    // TODO Change to address Id to Request Param
-    @PostMapping(path = RESTNouns.CUSTOMER + RESTNouns.REGISTER + RESTNouns.ADDRESS_ID)
+    @PostMapping(path = RESTNouns.CUSTOMER + RESTNouns.REGISTER)
     public ResponseEntity<Map<String, Object>> createCustomer(
-            @PathVariable("address_id") Long addressId,
             @RequestParam String firstName,
             @RequestParam String lastName,
             @RequestParam LocalDate birthday,
             @RequestParam String email,
             @RequestParam String username,
-            @RequestParam String password
-    ) {
+            @RequestParam String password,
+            @RequestParam Long addressId) {
         Map<String, Object> response = new HashMap<>();
 
         if (customerRepository.existsByUsername(username)) {
@@ -112,8 +151,7 @@ public class MainController {
     @PostMapping(path = RESTNouns.CUSTOMER + RESTNouns.LOGIN)
     public ResponseEntity<Map<String, Object>> loginCustomer(
             @RequestParam String username,
-            @RequestParam String password
-    ) {
+            @RequestParam String password) {
         Map<String, Object> response = new HashMap<>();
         Customer customer = customerRepository.findByUsername(username);
 
@@ -130,82 +168,50 @@ public class MainController {
     }
 
     /**
-     * Retrieves a specific user by their unique identifier.
-     *
-     * @param customerId The unique identifier of the user to retrieve
-     * @return An Optional containing the User if found, or an empty Optional
-     */
-    @GetMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID)
-    public @ResponseBody Optional<Customer> getCustomerById(@PathVariable("id") Long customerId) {
-        return customerRepository.findById(customerId);
-    }
-
-    @GetMapping(path = RESTNouns.CUSTOMER + RESTNouns.NAME)
-    public @ResponseBody Iterable<Customer> getAllCustomersByName(
-            @RequestParam String firstName,
-            @RequestParam String lastName) {
-        return customerRepository.getAllCustomersByFirstNameAndLastName(firstName, lastName);
-    }
-
-    @GetMapping(path = RESTNouns.CUSTOMER + RESTNouns.EMAIL)
-    public @ResponseBody Iterable<Customer> getAllCustomersByEmail(
-            @RequestParam String email) {
-        return customerRepository.getAllCustomersByEmail(email);
-    }
-
-    /**
      * Updates an existing customer's information.
      *
      * @param customerId The unique identifier of the user to update
      * @return A string message indicating the result of the update operation
      */
     @PutMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID)
-    public @ResponseBody String updateCustomerById(
+    public @ResponseBody ResponseEntity<Map<String, Object>> updateCustomerById(
             @PathVariable("id") Long customerId,
             @RequestParam String firstName,
             @RequestParam String lastName,
             @RequestParam LocalDate birthday,
             @RequestParam String email,
             @RequestParam Long addressId){
-        if (customerRepository.existsById(customerId) && addressRepository.existsById(addressId)) {
-            Optional<Customer> customer = customerRepository.findById(customerId);
-            Optional<Address> address = addressRepository.findById(addressId);
-            if(customer.isPresent() && address.isPresent()){
-                customer.get().setFirstName(firstName);
-                customer.get().setLastName(lastName);
-                customer.get().setBirthday(birthday);
-                customer.get().setEmail(email);
-                customer.get().setAddress(address.get());
-                customerRepository.save(customer.get());
-            }
-            return "Customer with ID " + customerId + " updated successfully.";
-        } else {
-            return "Customer with ID " + customerId + " not found.";
-        }
-    }
-
-    /**
-     * Deletes a customer from the database by their unique identifier.
-     *
-     * @param customerId The unique identifier of the user to delete
-     * @return A string message indicating the result of the deletion operation
-     */
-    @DeleteMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID)
-    public @ResponseBody String deleteCustomerById(@PathVariable("id") Long customerId) {
+        Map<String, Object> response = new HashMap<>();
         if (customerRepository.existsById(customerId)) {
-            customerRepository.deleteById(customerId);
-            return "Customer with ID " + customerId + " deleted successfully.";
-        } else {
-            return "Customer with ID " + customerId + " not found.";
+            if (addressRepository.existsById(addressId)) {
+                Optional<Customer> customer = customerRepository.findById(customerId);
+                Optional<Address> address = addressRepository.findById(addressId);
+                if (customer.isPresent() && address.isPresent()) {
+                    customer.get().setFirstName(firstName);
+                    customer.get().setLastName(lastName);
+                    customer.get().setBirthday(birthday);
+                    customer.get().setEmail(email);
+                    customer.get().setAddress(address.get());
+                    customerRepository.save(customer.get());
+                }
+                response.put("success", true);
+                response.put("message", "Customer with ID " + customerId + " updated successfully.");
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+            response.put("success", false);
+            response.put("message", "Address with ID " + addressId + " not found.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
+        response.put("success", false);
+        response.put("message", "Customer with ID " + customerId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @PutMapping(path = RESTNouns.CUSTOMER + RESTNouns.RESET + RESTNouns.ID)
     public ResponseEntity<Map<String, Object>> resetCustomerPasswordById(
             @PathVariable("id") Long customerId,
             @RequestParam String oldPassword,
-            @RequestParam String newPassword
-    ) {
+            @RequestParam String newPassword) {
         Map<String, Object> response = new HashMap<>();
         Optional<Customer> customerOptional = customerRepository.findById(customerId);
         if (customerOptional.isPresent()) {
@@ -224,7 +230,28 @@ public class MainController {
         }
         response.put("success", false);
         response.put("message", "Account not found.");
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Deletes a customer from the database by their unique identifier.
+     *
+     * @param customerId The unique identifier of the user to delete
+     * @return A string message indicating the result of the deletion operation
+     */
+    @DeleteMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> deleteCustomerById(@PathVariable("id") Long customerId) {
+        Map<String, Object> response = new HashMap<>();
+        if (customerRepository.existsById(customerId)) {
+            customerRepository.deleteById(customerId);
+            response.put("success", true);
+            response.put("message", "Customer with ID " + customerId + " deleted successfully.");
+            return new ResponseEntity<>(response, HttpStatus.GONE);
+        } else {
+            response.put("success", true);
+            response.put("message", "Customer with ID " + customerId + " not found.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
     }
 
     /* *
@@ -237,14 +264,18 @@ public class MainController {
      * @return An iterable collection of all User entities
      */
     @GetMapping(path = RESTNouns.EMPLOYEE)
-    public @ResponseBody Iterable<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllEmployees() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All employees retrieved");
+        response.put("object", employeeRepository.findAll());
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
+
     @PostMapping(path = RESTNouns.EMPLOYEE + RESTNouns.LOGIN)
     public ResponseEntity<Map<String, Object>> loginEmployee(
             @RequestParam String username,
-            @RequestParam String password
-    ) {
+            @RequestParam String password) {
         Map<String, Object> response = new HashMap<>();
         Employee employee = employeeRepository.findByUsername(username);
 
@@ -267,10 +298,11 @@ public class MainController {
      * @return A string message indicating the result of the update operation
      */
     @PutMapping(path = RESTNouns.EMPLOYEE + RESTNouns.ID)
-    public @ResponseBody String updateEmployeeNameById(
+    public @ResponseBody ResponseEntity<Map<String, Object>> updateEmployeeNameById(
             @PathVariable("id") Long employeeId,
             @RequestParam String firstName,
             @RequestParam String lastName){
+        Map<String, Object> response = new HashMap<>();
         if (employeeRepository.existsById(employeeId)) {
             Optional<Employee> employee = employeeRepository.findById(employeeId);
             if(employee.isPresent()){
@@ -278,9 +310,13 @@ public class MainController {
                 employee.get().setLastName(lastName);
                 employeeRepository.save(employee.get());
             }
-            return "Employee with ID " + employeeId + " updated successfully.";
+            response.put("success", true);
+            response.put("message", "Employee with ID " + employeeId + " updated successfully.");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
-            return "Employee with ID " + employeeId + " not found.";
+            response.put("success", false);
+            response.put("message", "Employee with ID " + employeeId + " not found.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -291,7 +327,7 @@ public class MainController {
      * @return A string message indicating the result of the update operation
      */
     @PutMapping(path = RESTNouns.EMPLOYEE + RESTNouns.CUSTOMER + RESTNouns.ID)
-    public @ResponseBody String employeeUpdateCustomerById(
+    public @ResponseBody ResponseEntity<Map<String, Object>> employeeUpdateCustomerById(
             @PathVariable("id") Long customerId,
             @RequestParam String firstName,
             @RequestParam String lastName,
@@ -300,6 +336,7 @@ public class MainController {
             @RequestParam Long addressId,
             @RequestParam String username,
             @RequestParam String password){
+        Map<String, Object> response = new HashMap<>();
         if (customerRepository.existsById(customerId) && addressRepository.existsById(addressId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
             Optional<Address> address = addressRepository.findById(addressId);
@@ -313,9 +350,13 @@ public class MainController {
                 customer.get().setPassword(passwordEncryptor.encryptPassword(password));
                 customerRepository.save(customer.get());
             }
-            return "Customer with ID " + customerId + " updated successfully.";
+            response.put("success", true);
+            response.put("message", "Customer with ID " + customerId + " updated successfully.");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
-            return "Customer with ID " + customerId + " not found.";
+            response.put("success", false);
+            response.put("message", "Customer with ID " + customerId + " not found.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -323,8 +364,7 @@ public class MainController {
     public ResponseEntity<Map<String, Object>> resetEmployeePasswordById(
             @PathVariable("id") Long employeeId,
             @RequestParam String oldPassword,
-            @RequestParam String newPassword
-    ) {
+            @RequestParam String newPassword) {
         Map<String, Object> response = new HashMap<>();
         Optional<Employee> employeeOptional = employeeRepository.findById(employeeId);
         if (employeeOptional.isPresent()) {
@@ -364,8 +404,7 @@ public class MainController {
             @RequestParam String lastName,
             @RequestParam String email,
             @RequestParam String username,
-            @RequestParam String password
-    ) {
+            @RequestParam String password) {
         Map<String, Object> response = new HashMap<>();
 
         if (employeeRepository.existsByUsername(username)) {
@@ -395,13 +434,14 @@ public class MainController {
      * @return A string message indicating the result of the update operation
      */
     @PutMapping(path = RESTNouns.ADMIN + RESTNouns.ID)
-    public @ResponseBody String adminUpdateEmployeeById(
+    public @ResponseBody ResponseEntity<Map<String, Object>> adminUpdateEmployeeById(
             @PathVariable("id") Long employeeId,
             @RequestParam String firstName,
             @RequestParam String lastName,
             @RequestParam String email,
             @RequestParam String username,
             @RequestParam String password){
+        Map<String, Object> response = new HashMap<>();
         if (employeeRepository.existsById(employeeId)) {
             Optional<Employee> employee = employeeRepository.findById(employeeId);
             if(employee.isPresent()){
@@ -412,9 +452,13 @@ public class MainController {
                 employee.get().setPassword(passwordEncryptor.encryptPassword(password));
                 employeeRepository.save(employee.get());
             }
-            return "Employee with ID " + employeeId + " updated successfully.";
+            response.put("success", true);
+            response.put("message", "Employee with ID " + employeeId + " updated successfully.");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
-            return "Employee with ID " + employeeId + " not found.";
+            response.put("success", false);
+            response.put("message", "Employee with ID " + employeeId + " not found.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -425,12 +469,17 @@ public class MainController {
      * @return A string message indicating the result of the deletion operation
      */
     @DeleteMapping(path = RESTNouns.ADMIN + RESTNouns.ID)
-    public @ResponseBody String adminDeleteEmployeeById(@PathVariable("id") Long employeeId) {
+    public @ResponseBody ResponseEntity<Map<String, Object>> adminDeleteEmployeeById(@PathVariable("id") Long employeeId) {
+        Map<String, Object> response = new HashMap<>();
         if (employeeRepository.existsById(employeeId)) {
             employeeRepository.deleteById(employeeId);
-            return "Employee with ID " + employeeId + " deleted successfully.";
+            response.put("success", true);
+            response.put("message", "Employee with ID " + employeeId + " deleted successfully.");
+            return new ResponseEntity<>(response, HttpStatus.GONE);
         } else {
-            return "Employee with ID " + employeeId + " not found.";
+            response.put("success", false);
+            response.put("message", "Employee with ID " + employeeId + " not found.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -445,18 +494,21 @@ public class MainController {
      * @return An iterable collection of Home entities belonging to the specified customer
      */
 
-    // TODO Refactor the path
-    @GetMapping(path = RESTNouns.CUSTOMER +  RESTNouns.ID + RESTNouns.HOME)
-    public @ResponseBody Iterable<Home> getAllHomesByCustomerId(@PathVariable("id") Long customerId) {
-        Iterable<Home> homes = null;
+    @GetMapping(path = RESTNouns.HOME +  RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomesByCustomerId(@PathVariable("id") Long customerId) {
+        Map<String, Object> response = new HashMap<>();
         if (customerRepository.existsById(customerId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
             if(customer.isPresent()){
-                homes = homeRepository.getAllHomesByCustomer(customer.get());
+                response.put("success", true);
+                response.put("message", "All homes of customer ID "+ customerId +" retrieved");
+                response.put("object", homeRepository.getAllHomesByCustomer(customer.get()));
+                return new ResponseEntity<>(response, HttpStatus.FOUND);
             }
         }
-
-        return homes;
+        response.put("success", false);
+        response.put("message", "Customer with ID " + customerId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -467,20 +519,20 @@ public class MainController {
      * @param homeValue The monetary value of the home
      * @return The newly created Home entity, or null if the user does not exist
      */
-    @PostMapping(path = RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID + RESTNouns.HOME + RESTNouns.ADDRESS_ID)
-    public @ResponseBody Home createHomeByCustomerAndAddressIds(
-            @PathVariable("customer_id") Long customerId,
-            @PathVariable("address_id") Long addressId,
+    @PostMapping(path = RESTNouns.HOME + RESTNouns.ID + RESTNouns.ADDITIONAL_ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> createHomeByAddressAndCustomerIds(
+            @PathVariable("id") Long addressId,
+            @PathVariable("additional_id") Long customerId,
             @RequestParam LocalDate dateBuilt,
             @RequestParam Integer homeValue,
             @RequestParam Home.HeatingType heatingType,
             @RequestParam Home.Location location,
             @RequestParam Home.DwellingType dwellingType) {
-        Home home = null;
+        Map<String, Object> response = new HashMap<>();
         if (customerRepository.existsById(customerId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
             if (customer.isPresent()) {
-                home = new Home();
+                Home home = new Home();
                 Optional<Address> address = addressRepository.findById(addressId);
                 home.setHomeValue(homeValue);
                 home.setDateBuilt(dateBuilt);
@@ -490,10 +542,15 @@ public class MainController {
                 home.setTypeOfDwelling(dwellingType);
                 address.ifPresent(home::setAddress);
                 homeRepository.save(home);
+                response.put("success", true);
+                response.put("message", "Home created successfully.");
+                response.put("object", home);
+                return new ResponseEntity<>(response, HttpStatus.CREATED);
             }
         }
-
-        return home;
+        response.put("success", false);
+        response.put("message", "Customer with ID " + customerId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -504,9 +561,9 @@ public class MainController {
      * @param homeValue The new monetary value of the home
      * @return A string message indicating the result of the update operation
      */
-    @PutMapping(path =  RESTNouns.HOME + RESTNouns.HOME_ID)
-    public @ResponseBody String updateHomeById(
-            @PathVariable("home_id") Long homeId,
+    @PutMapping(path =  RESTNouns.HOME + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> updateHomeById(
+            @PathVariable("id") Long homeId,
             @RequestParam LocalDate dateBuilt,
             @RequestParam int homeValue,
             @RequestParam Home.HeatingType heatingType,
@@ -514,6 +571,7 @@ public class MainController {
             @RequestParam Home.DwellingType dwellingType,
             @RequestParam Long customerId,
             @RequestParam Long addressId){
+        Map<String, Object> response = new HashMap<>();
         if (homeRepository.existsById(homeId)) {
             Optional<Home> home = homeRepository.findById(homeId);
             if(home.isPresent()){
@@ -531,29 +589,35 @@ public class MainController {
                     customerRepository.save(customer.get());
                 }
             }
-            return "Home with ID " + homeId + " updated successfully.";
+            response.put("success", true);
+            response.put("message", "Home with ID " + homeId + " updated successfully.");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
-            return "Home with ID " + homeId + " not found.";
+            response.put("success", false);
+            response.put("message", "Home with ID " + homeId + " not found.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 
     /**
      * Deletes a specific home associated with a user.
      *
-     * @param customerId The unique identifier of the user who owns the home
      * @param homeId The unique identifier of the home to be deleted
      * @return A string message indicating the result of the deletion operation
      */
 
-    // TODO refactor to by Home ID only
-    @DeleteMapping(path = RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID + RESTNouns.HOME + RESTNouns.HOME_ID)
-    public @ResponseBody String deleteHomeById(
-            @PathVariable("customer_id") Long customerId, @PathVariable("home_id") Long homeId) {
-        if (customerRepository.existsById(customerId) && homeRepository.existsById(homeId)) {
+    @DeleteMapping(path = RESTNouns.HOME + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> deleteHomeById( @PathVariable("id") Long homeId) {
+        Map<String, Object> response = new HashMap<>();
+        if (homeRepository.existsById(homeId)) {
             homeRepository.deleteById(homeId);
-            return "Home with ID " + homeId + " deleted successfully.";
+            response.put("success", true);
+            response.put("message", "Home with ID " + homeId + " deleted successfully.");
+            return new ResponseEntity<>(response, HttpStatus.GONE);
         } else {
-            return "Home with ID " + homeId + " not found.";
+            response.put("success", false);
+            response.put("message", "Home with ID " + homeId + " not found.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -562,17 +626,25 @@ public class MainController {
     * */
 
     @GetMapping(path = RESTNouns.ADDRESS)
-    public @ResponseBody Iterable<Address> getAllAddresses() {
-        return addressRepository.findAll();
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllAddresses() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All addresses retrieved");
+        response.put("object", addressRepository.findAll());
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
     @GetMapping(path = RESTNouns.ADDRESS + RESTNouns.ID)
-    public @ResponseBody Optional<Address> getAddressById(@PathVariable("id") Long addressId) {
-        return addressRepository.findById(addressId);
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAddressById(@PathVariable("id") Long addressId) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Address with ID "+ addressId +" retrieved");
+        response.put("object", addressRepository.findById(addressId));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
     @PostMapping(path = RESTNouns.ADDRESS)
-    public @ResponseBody Address createAddress(
+    public @ResponseBody ResponseEntity<Map<String, Object>> createAddress(
             @RequestParam Integer unit,
             @RequestParam String street,
             @RequestParam String city,
@@ -585,18 +657,22 @@ public class MainController {
         address.setProvince(province);
         address.setPostalCode(postalCode);
         addressRepository.save(address);
-
-        return address;
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Address created successfully");
+//        response.put("object", address);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PutMapping(path = RESTNouns.ADDRESS + RESTNouns.ADDRESS_ID)
-        public @ResponseBody String updateAddressById(
-                @PathVariable("address_id") Long addressId,
+    @PutMapping(path = RESTNouns.ADDRESS + RESTNouns.ID)
+        public @ResponseBody ResponseEntity<Map<String, Object>> updateAddressById(
+                @PathVariable("id") Long addressId,
                 @RequestParam Integer unit,
                 @RequestParam String street,
                 @RequestParam String city,
                 @RequestParam String province,
                 @RequestParam String postalCode){
+        Map<String, Object> response = new HashMap<>();
             if (addressRepository.existsById(addressId)) {
                 Optional<Address> address = addressRepository.findById(addressId);
                 if(address.isPresent()){
@@ -607,20 +683,29 @@ public class MainController {
                     address.get().setPostalCode(postalCode);
                     addressRepository.save(address.get());
                 }
-                return "Address with ID " + addressId + " updated successfully.";
+                response.put("success", true);
+                response.put("message", "Address with ID " + addressId + " updated successfully.");
+                return new ResponseEntity<>(response, HttpStatus.OK);
             } else {
-                return "Address with ID " + addressId + " not found.";
+                response.put("success", false);
+                response.put("message", "Address with ID " + addressId + " not found.");
+                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
             }
         }
 
-    @DeleteMapping(path = RESTNouns.ADDRESS + RESTNouns.ADDRESS_ID)
-    public @ResponseBody String deleteAddressById(
-            @PathVariable("address_id") Long addressId) {
+    @DeleteMapping(path = RESTNouns.ADDRESS + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> deleteAddressById(
+            @PathVariable("id") Long addressId) {
+        Map<String, Object> response = new HashMap<>();
         if (addressRepository.existsById(addressId)) {
             addressRepository.deleteById(addressId);
-            return "Address with ID " + addressId + " deleted successfully.";
+            response.put("success", true);
+            response.put("message", "Address with ID " + addressId + " deleted successfully.");
+            return new ResponseEntity<>(response, HttpStatus.GONE);
         } else {
-            return "Address with ID " + addressId + " not found.";
+            response.put("success", false);
+            response.put("message", "Address with ID " + addressId + " not found.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -636,17 +721,21 @@ public class MainController {
      *         or null if the user does not exist
      */
 
-    // TODO refactor the path
-    @GetMapping(path = RESTNouns.CUSTOMER +  RESTNouns.ID + RESTNouns.AUTO)
-    public @ResponseBody Iterable<Auto> getAllAutosByCustomerId(@PathVariable("id") Long customerId) {
-        Iterable<Auto> autos = null;
+    @GetMapping(path = RESTNouns.AUTO +  RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllAutosByCustomerId(@PathVariable("id") Long customerId) {
+        Map<String, Object> response = new HashMap<>();
         if (customerRepository.existsById(customerId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
             if(customer.isPresent()){
-                autos = autoRepository.getAllByCustomerId(customerId);
+                response.put("success", true);
+                response.put("message", "All autos with customer ID "+ customerId +" retrieved");
+                response.put("object", autoRepository.getAllByCustomerId(customerId));
+                return new ResponseEntity<>(response, HttpStatus.FOUND);
             }
         }
-        return autos;
+        response.put("success", false);
+        response.put("message", "Customer with ID " + customerId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -656,141 +745,162 @@ public class MainController {
      * @return The newly created Auto entity, or null if the user does not exist
      */
 
-    // TODO refactor the path
-    @PostMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID + RESTNouns.AUTO)
-    public @ResponseBody Auto createAutoByCustomerID(
+    @PostMapping(path = RESTNouns.AUTO + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> createAutoByCustomerID(
             @PathVariable("id") Long customerId,
             @RequestParam String make,
             @RequestParam String model,
-            @RequestParam Integer year
-            ) {
-        Auto auto = null;
+            @RequestParam Integer year) {
+        Map<String, Object> response = new HashMap<>();
         if (customerRepository.existsById(customerId)) {
             Optional<Customer> customer = customerRepository.findById(customerId);
             if (customer.isPresent()) {
-                auto = new Auto();
+                Auto auto = new Auto();
                 auto.setMake(make);
                 auto.setModel(model);
                 auto.setYear(year);
                 auto.setCustomer(customer.get());
                 autoRepository.save(auto);
+                response.put("success", true);
+                response.put("message", "Auto created successfully");
+//                response.put("object", auto);
+                return new ResponseEntity<>(response, HttpStatus.CREATED);
             }
         }
-
-        return auto;
+        response.put("success", false);
+        response.put("message", "Customer with ID " + customerId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     /**
      * Updates an existing auto object associated with a specific user.
      *
-     * @param userId The unique identifier of the user who owns the auto
      * @param autoId The unique identifier of the auto to be updated
      * @return A string message indicating the result of the update operation
      */
 
-    // TODO refactor the path and method to only be by auto ID
-    @PutMapping(path = RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID + RESTNouns.AUTO + RESTNouns.AUTO_ID)
-    public @ResponseBody String updateAutoByCustomerId(
-            @PathVariable("customer_id") Long userId,
-            @PathVariable("auto_id") Long autoId,
+    @PutMapping(path = RESTNouns.AUTO + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> updateAutoById(
+            @PathVariable("id") Long autoId,
             @RequestParam String make,
             @RequestParam String model,
             @RequestParam Integer year){
-        if (customerRepository.existsById(userId) && autoRepository.existsById(autoId)) {
-            Optional<Customer> customer = customerRepository.findById(userId);
+        Map<String, Object> response = new HashMap<>();
+        if (autoRepository.existsById(autoId)) {
             Optional<Auto> auto = autoRepository.findById(autoId);
-            if(customer.isPresent() && auto.isPresent()){
+            if(auto.isPresent()){
                 auto.get().setMake(make);
                 auto.get().setModel(model);
                 auto.get().setYear(year);
                 autoRepository.save(auto.get());
-                customerRepository.save(customer.get());
             }
-            return "Auto with ID " + autoId + " updated successfully.";
-        } else {
-            return "Auto with ID " + autoId + " not found.";
+            response.put("success", true);
+            response.put("message", "Auto with ID " + autoId + " updated successfully.");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
+        response.put("success", false);
+        response.put("message", "Auto with ID " + autoId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     /**
      * Deletes a specific auto object associated with a customer.
      *
-     * @param customerId The unique identifier of the customer who owns the auto
      * @param autoId The unique identifier of the auto to be deleted
      * @return A string message indicating the result of the deletion operation
      */
 
-    // TODO refactor the path and method to only be by auto ID
-    @DeleteMapping(path = RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID + RESTNouns.AUTO + RESTNouns.AUTO_ID)
-    public @ResponseBody String deleteAutoByCustomerId(
-            @PathVariable("customer_id") Long customerId, @PathVariable("auto_id") Long autoId) {
-        if (customerRepository.existsById(customerId) && autoRepository.existsById(autoId)) {
+    @DeleteMapping(path = RESTNouns.AUTO + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> deleteAutoByCustomerId(@PathVariable("id") Long autoId) {
+        Map<String, Object> response = new HashMap<>();
+        if (autoRepository.existsById(autoId)) {
             autoRepository.deleteById(autoId);
-            return "Auto with ID " + autoId + " deleted successfully.";
-        } else {
-            return "Auto with ID " + autoId + " not found.";
+            response.put("success", true);
+            response.put("message", "Auto with ID " + autoId + " deleted successfully.");
+            return new ResponseEntity<>(response, HttpStatus.GONE);
         }
+        response.put("success", false);
+        response.put("message", "Auto with ID " + autoId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     /* *
      *  ACCIDENTS METHODS
      * */
     @GetMapping(path = RESTNouns.ACCIDENT)
-        public @ResponseBody Iterable<Accident> getAllAccidents() {
-            return accidentsRepository.findAll();
+        public @ResponseBody ResponseEntity<Map<String, Object>> getAllAccidents() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All accidents retrieved");
+        response.put("object", accidentsRepository.findAll());
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
         }
 
     @GetMapping(path = RESTNouns.ACCIDENT + RESTNouns.ID)
-        public @ResponseBody Optional<Accident> getAccidentById(@PathVariable("id") Long accidentID) {
-            return accidentsRepository.findById(accidentID);
+        public @ResponseBody ResponseEntity<Map<String, Object>> getAccidentById(@PathVariable("id") Long accidentID) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All accidents with ID "+ accidentID +" retrieved");
+        response.put("object", accidentsRepository.findById(accidentID));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
         }
 
-    @PostMapping(path = RESTNouns.ACCIDENT + RESTNouns.CUSTOMER_ID)
-        public @ResponseBody Accident createAccidentByCustomerId(
-                @PathVariable("customer_id") Long customerId,
+    @PostMapping(path = RESTNouns.ACCIDENT + RESTNouns.ID)
+        public @ResponseBody ResponseEntity<Map<String, Object>> createAccidentByCustomerId(
+                @PathVariable("id") Long customerId,
                 @RequestParam LocalDate dateOfAccident) {
-            Accident accident = null;
+            Map<String, Object> response = new HashMap<>();
             if (customerRepository.existsById(customerId)) {
                 Optional<Customer> customer = customerRepository.findById(customerId);
                 if (customer.isPresent()) {
-                    accident = new Accident();
+                    Accident accident = new Accident();
                     accident.setCustomer(customer.get());
                     accident.setDate(dateOfAccident);
                     accidentsRepository.save(accident);
+                    response.put("success", true);
+                    response.put("message", "Accident created successfully");
+//                    response.put("object", accident);
+                    return new ResponseEntity<>(response, HttpStatus.CREATED);
                 }
             }
-
-            return accident;
+            response.put("success", false);
+            response.put("message", "Customer with ID " + customerId + " not found.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
 
-    @PutMapping(path = RESTNouns.ACCIDENT + RESTNouns.CUSTOMER_ID + RESTNouns.ACCIDENT_ID)
-    public @ResponseBody String updateAccidentById(
-            @PathVariable("customer_id") Long customerId,
-            @PathVariable("accident_id") Long accidentId,
+    @PutMapping(path = RESTNouns.ACCIDENT + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> updateAccidentById(
+            @PathVariable("id") Long accidentId,
             @RequestParam LocalDate dateOfAccident){
-        if (customerRepository.existsById(customerId) && accidentsRepository.existsById(accidentId)) {
-            Optional<Customer> customer = customerRepository.findById(customerId);
+        Map<String, Object> response = new HashMap<>();
+        if (accidentsRepository.existsById(accidentId)) {
             Optional<Accident> accident = accidentsRepository.findById(accidentId);
-            if(customer.isPresent() && accident.isPresent()){
-                accident.get().setCustomer(customer.get());
+            if(accident.isPresent()){
                 accident.get().setDate(dateOfAccident);
                 accidentsRepository.save(accident.get());
             }
-            return "Accident with ID " + accidentId + " updated successfully.";
-        } else {
-            return "Accident with ID " + accidentId + " not found.";
+            response.put("success", true);
+            response.put("message", "Accident with ID " + accidentId + " updated successfully.");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
+        response.put("success", false);
+        response.put("message", "Accident with ID " + accidentId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    @DeleteMapping(path = RESTNouns.ACCIDENT + RESTNouns.ACCIDENT_ID)
-    public @ResponseBody String deleteAccidentById(
-            @PathVariable("accident_id") Long accidentId) {
+    @DeleteMapping(path = RESTNouns.ACCIDENT + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> deleteAccidentById(
+            @PathVariable("id") Long accidentId) {
+        Map<String, Object> response = new HashMap<>();
         if (accidentsRepository.existsById(accidentId)) {
             accidentsRepository.deleteById(accidentId);
-            return "Accident with ID " + accidentId + " deleted successfully.";
-        } else {
-            return "Accident with ID " + accidentId + " not found.";
+            response.put("success", true);
+            response.put("message", "Accident with ID " + accidentId + " deleted successfully.");
+            return new ResponseEntity<>(response, HttpStatus.GONE);
         }
+        response.put("success", false);
+        response.put("message", "Accident with ID " + accidentId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     /* *
@@ -803,33 +913,48 @@ public class MainController {
      * @return An iterable collection of all HomeQuote entities
      */
     @GetMapping(path = RESTNouns.HOME_QUOTE)
-    public @ResponseBody Iterable<HomeQuote> getAllHomeQuotes() {
-        return homeQuoteRepository.findAll();
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomeQuotes() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All home quotes retrieved");
+        response.put("object", homeQuoteRepository.findAll());
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
     @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ID)
-    public @ResponseBody Optional<HomeQuote> getHomeQuoteById(@PathVariable("id") Long quoteID) {
-        return homeQuoteRepository.findById(quoteID);
+    public @ResponseBody ResponseEntity<Map<String, Object>> getHomeQuoteById(@PathVariable("id") Long quoteID) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Home quote with ID "+ quoteID +" retrieved");
+        response.put("object", homeQuoteRepository.findById(quoteID));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
-    @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID)
-    public @ResponseBody Iterable<HomeQuote> getAllHomeQuotesByCustomerId(@PathVariable("customer_id") Long customerID) {
-        return homeQuoteRepository.getAllByCustId(customerID);
+    @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.CUSTOMER + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomeQuotesByCustomerId(@PathVariable("id") Long customerID) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All home quotes with customer ID " + customerID + " retrieved");
+        response.put("object", homeQuoteRepository.getAllByCustId(customerID));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
-    @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ACTIVE + RESTNouns.CUSTOMER_ID)
-    public @ResponseBody Iterable<HomeQuote> getAllActiveHomeQuotesByCustomerId(@PathVariable("customer_id") Long customerID) {
-        return homeQuoteRepository.getAllActiveByCustIdAndActive(customerID, true);
+    @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ACTIVE + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllActiveHomeQuotesByCustomerId(@PathVariable("id") Long customerID) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All active home quotes with customer ID " + customerID + " retrieved");
+        response.put("object", homeQuoteRepository.getAllActiveByCustIdAndActive(customerID, true));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
-    @PostMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.HOME_ID)
-    public @ResponseBody HomeQuote createHomeQuoteByCustomerAndHomeId(
-            @PathVariable("customer_id") Long customerId,
-            @PathVariable("home_id") Long homeId,
+    @PostMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ID + RESTNouns.ADDITIONAL_ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> createHomeQuoteByCustomerAndHomeId(
+            @PathVariable("id") Long customerId,
+            @PathVariable("additional_id") Long homeId,
             @RequestParam int liability,
-            @RequestParam boolean packagedQuote
-    ) {
-        HomeQuote quote = null;
+            @RequestParam boolean packagedQuote) {
+        Map<String, Object> response = new HashMap<>();
         if (customerRepository.existsById(customerId) && homeRepository.existsById(homeId)) {
             Optional<Home> home = homeRepository.findById(homeId);
             Optional<Customer> customer = customerRepository.findById(customerId);
@@ -868,7 +993,7 @@ public class MainController {
                 double addPremium = (home.get().getHomeValue() > 250000) ? home.get().getHomeValue() * 0.002 : 0;
                 double premium = (baseHomePremium + addPremium) * factor * (taxRate + 1);
                 premium = Double.parseDouble(decimalFormatter.format(premium));
-                quote = new HomeQuote();
+                HomeQuote quote = new HomeQuote();
                 quote.setPremium(premium);
                 quote.setGenerationDate(today);
                 quote.setLiabilityLimit(liability);
@@ -877,30 +1002,35 @@ public class MainController {
                 quote.setBasePremium(baseHomePremium);
                 quote.setCustId(customer.get().getId());
                 homeQuoteRepository.save(quote);
+                response.put("success", true);
+                response.put("message", "Home Quote created successfully");
+//                response.put("object", quote);
+                return new ResponseEntity<>(response, HttpStatus.CREATED);
             }
         }
-        return quote;
+        response.put("success", false);
+        response.put("message", "Customer with ID " + customerId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    // TODO Uodate path to use only quote ID
-    @PutMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.QUOTE_ID)
-    public @ResponseBody String updateHomeQuoteByCustomer(
-            @PathVariable("customer_id") Long customerId,
-            @PathVariable("quote_id") Long policyId,
+    @PutMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> updateHomeQuoteById(
+            @PathVariable("id") Long quoteId,
             @RequestParam boolean activeStatus){
-        if (customerRepository.existsById(customerId) && homeQuoteRepository.existsById(policyId)) {
-            Optional<Customer> customer = customerRepository.findById(customerId);
-            Optional<HomeQuote> homeQuote = homeQuoteRepository.findById(policyId);
-            if(customer.isPresent() && homeQuote.isPresent()){
+        Map<String, Object> response = new HashMap<>();
+        if (homeQuoteRepository.existsById(quoteId)) {
+            Optional<HomeQuote> homeQuote = homeQuoteRepository.findById(quoteId);
+            if(homeQuote.isPresent()){
                 homeQuote.get().setActive(activeStatus);
-
                 homeQuoteRepository.save(homeQuote.get());
-                customerRepository.save(customer.get());
             }
-            return "Home Quote with ID " + policyId + " updated successfully.";
-        } else {
-            return "Home Quote with ID " + policyId + " not found.";
+            response.put("success", true);
+            response.put("message", "Home Quote with ID " + quoteId + " updated successfully.");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
+        response.put("success", false);
+        response.put("message", "Home Quote with ID " + quoteId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
 
@@ -914,31 +1044,47 @@ public class MainController {
      * @return An iterable collection of all AutoQuote entities
      */
     @GetMapping(path = RESTNouns.AUTO_QUOTE)
-    public @ResponseBody Iterable<AutoQuote> getAllAutoQuotes() {
-        return autoQuoteRepository.findAll();
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllAutoQuotes() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All auto quotes retrieved");
+        response.put("object", autoQuoteRepository.findAll());
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
     @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ID)
-    public @ResponseBody Optional<AutoQuote> getAutoQuoteById(@PathVariable("id") Long quoteID) {
-        return autoQuoteRepository.findById(quoteID);
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAutoQuoteById(@PathVariable("id") Long quoteID) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Auto quote with ID " + quoteID + " retrieved");
+        response.put("object", autoQuoteRepository.findById(quoteID));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
-    @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID)
-    public @ResponseBody Iterable<AutoQuote> getAllAutoQuotesByCustomerId(@PathVariable("customer_id") Long customerID) {
-        return autoQuoteRepository.getAllByCustId(customerID);
+    @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.CUSTOMER + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllAutoQuotesByCustomerId(@PathVariable("id") Long customerID) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All auto quotes with customer ID " + customerID + " retrieved");
+        response.put("object", autoQuoteRepository.getAllByCustId(customerID));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
-    @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ACTIVE + RESTNouns.CUSTOMER_ID)
-    public @ResponseBody Iterable<AutoQuote> getAllActiveAutoQuotesByCustomerId(@PathVariable("customer_id") Long customerID) {
-        return autoQuoteRepository.getAllActiveByCustIdAndActive(customerID, true);
+    @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ACTIVE + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllActiveAutoQuotesByCustomerId(@PathVariable("id") Long customerID) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All active auto quotes with customer ID " + customerID + " retrieved");
+        response.put("object", autoQuoteRepository.getAllActiveByCustIdAndActive(customerID, true));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
-    @PostMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.AUTO_ID)
-    public @ResponseBody AutoQuote createAutoQuoteByCustomerAndAutoId(
-            @PathVariable("customer_id") Long customerId,
-            @PathVariable("auto_id") Long autoId,
+    @PostMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ID + RESTNouns.ADDITIONAL_ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> createAutoQuoteByCustomerAndAutoId(
+            @PathVariable("id") Long customerId,
+            @PathVariable("additional_id") Long autoId,
             @RequestParam boolean packagedQuote) {
-        AutoQuote quote = null;
+        Map<String, Object> response = new HashMap<>();
         if (customerRepository.existsById(customerId) && autoRepository.existsById(autoId)) {
             Optional<Auto> auto = autoRepository.findById(autoId);
             Optional<Customer> customer = customerRepository.findById(customerId);
@@ -980,7 +1126,7 @@ public class MainController {
                 }
                 double premium = baseAutoPremium * factor * (taxRate + 1);
                 premium = Double.parseDouble(decimalFormatter.format(premium));
-                quote = new AutoQuote();
+                AutoQuote quote = new AutoQuote();
                 quote.setGenerationDate(today);
                 quote.setPremium(premium);
                 quote.setTaxRate(taxRate);
@@ -988,30 +1134,35 @@ public class MainController {
                 quote.setBasePremium(baseAutoPremium);
                 quote.setCustId(customer.get().getId());
                 autoQuoteRepository.save(quote);
+                response.put("success", true);
+                response.put("message", "Home Quote created successfully");
+//                response.put("object", quote);
+                return new ResponseEntity<>(response, HttpStatus.CREATED);
             }
         }
-        return quote;
+        response.put("success", false);
+        response.put("message", "Customer with ID " + customerId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    // TODO Uodate path to use only quote ID
-    @PutMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.CUSTOMER_ID + RESTNouns.QUOTE_ID)
-    public @ResponseBody String updateAutoQuoteByCustomer(
-            @PathVariable("customer_id") Long customerId,
-            @PathVariable("quote_id") Long policyId,
+    @PutMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> updateAutoQuoteById(
+            @PathVariable("id") Long quoteId,
             @RequestParam boolean activeStatus) {
-        if (customerRepository.existsById(customerId) && autoQuoteRepository.existsById(policyId)) {
-            Optional<Customer> customer = customerRepository.findById(customerId);
-            Optional<AutoQuote> autoQuote = autoQuoteRepository.findById(policyId);
-            if(customer.isPresent() && autoQuote.isPresent()){
+        Map<String, Object> response = new HashMap<>();
+        if (autoQuoteRepository.existsById(quoteId)) {
+            Optional<AutoQuote> autoQuote = autoQuoteRepository.findById(quoteId);
+            if(autoQuote.isPresent()){
                 autoQuote.get().setActive(activeStatus);
-
                 autoQuoteRepository.save(autoQuote.get());
-                customerRepository.save(customer.get());
             }
-            return "Auto Quote with ID " + policyId + " updated successfully.";
-        } else {
-            return "Auto Quote with ID " + policyId + " not found.";
+            response.put("success", true);
+            response.put("message", "Auto Quote with ID " + quoteId + " updated successfully.");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
+        response.put("success", false);
+        response.put("message", "Auto Quote with ID " + quoteId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
 
@@ -1025,34 +1176,50 @@ public class MainController {
      * @return An iterable collection of all HomePolicy entities
      */
     @GetMapping(path = RESTNouns.HOME_POLICY)
-    public @ResponseBody Iterable<HomePolicy> getAllHomePolicies() {
-        return homePolicyRepository.findAll();
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomePolicies() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All home policies retrieved");
+        response.put("object", homePolicyRepository.findAll());
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
     @GetMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ID)
-    public @ResponseBody Optional<HomePolicy> getHomePolicyById(@PathVariable("id") Long quoteID) {
-        return homePolicyRepository.findById(quoteID);
+    public @ResponseBody ResponseEntity<Map<String, Object>> getHomePolicyById(@PathVariable("id") Long policyId) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Home policy with ID " + policyId + " retrieved");
+        response.put("object", homePolicyRepository.findById(policyId));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
-    @GetMapping(path = RESTNouns.HOME_POLICY + RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID)
-    public @ResponseBody Iterable<HomePolicy> getAllHomePoliciesByCustomerId(@PathVariable("customer_id") Long customerID) {
-        return homePolicyRepository.getAllByCustId(customerID);
+    @GetMapping(path = RESTNouns.HOME_POLICY + RESTNouns.CUSTOMER + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomePoliciesByCustomerId(@PathVariable("id") Long customerID) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All home policies with customer ID " + customerID + " retrieved");
+        response.put("object", homePolicyRepository.getAllByCustId(customerID));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
-    @GetMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ACTIVE + RESTNouns.CUSTOMER_ID)
-    public @ResponseBody Iterable<HomePolicy> getAllActiveHomePoliciesByCustomerId(@PathVariable("customer_id") Long customerID) {
-        return homePolicyRepository.getAllActiveByCustIdAndActive(customerID, true);
+    @GetMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ACTIVE + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllActiveHomePoliciesByCustomerId(@PathVariable("id") Long customerID) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All active home policies with customer ID " + customerID + " retrieved");
+        response.put("object", homePolicyRepository.getAllActiveByCustIdAndActive(customerID, true));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
-    @PostMapping(path = RESTNouns.HOME_POLICY + RESTNouns.QUOTE_ID)
-    public @ResponseBody HomePolicy createHomePolicyByHomeQuoteId(
-            @PathVariable("quote_id") Long quoteId,
+    @PostMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> createHomePolicyByHomeQuoteId(
+            @PathVariable("id") Long quoteId,
             @RequestParam LocalDate effectiveDate) {
+        Map<String, Object> response = new HashMap<>();
         Optional<HomeQuote> quoteOptional = homeQuoteRepository.findById(quoteId);
-        HomePolicy policy = null;
         if (quoteOptional.isPresent()) {
             HomeQuote quote = quoteOptional.get();
-            policy = new HomePolicy();
+            HomePolicy policy = new HomePolicy();
             policy.setEffectiveDate(effectiveDate);
             policy.setEndDate(effectiveDate.plusYears(1));
             policy.setPremium(quote.getPremium());
@@ -1062,31 +1229,36 @@ public class MainController {
             policy.setCustId(quote.getCustId());
             policy.setBasePremium(quote.getBasePremium());
             homePolicyRepository.save(policy);
+            response.put("success", true);
+            response.put("message", "Home Policy created successfully");
+//            response.put("object", policy);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
-        return policy;
+        response.put("success", false);
+        response.put("message", "Home Quote with ID " + quoteId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    // TODO Update to use only policy ID
-    @PutMapping(path = RESTNouns.HOME_POLICY + RESTNouns.CUSTOMER_ID + RESTNouns.POLICY_ID)
-    public @ResponseBody String updateHomePolicyByCustomer(
-            @PathVariable("customer_id") Long customerId,
-            @PathVariable("policy_id") Long policyId,
+    @PutMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> updateHomePolicyByCustomer(
+            @PathVariable("id") Long policyId,
             @RequestParam boolean activeStatus,
             @RequestParam LocalDate endDate){
-        if (customerRepository.existsById(customerId) && homePolicyRepository.existsById(policyId)) {
-            Optional<Customer> customer = customerRepository.findById(customerId);
+        Map<String, Object> response = new HashMap<>();
+        if (homePolicyRepository.existsById(policyId)) {
             Optional<HomePolicy> homePolicy = homePolicyRepository.findById(policyId);
-            if(customer.isPresent() && homePolicy.isPresent()){
+            if(homePolicy.isPresent()){
                 homePolicy.get().setActive(activeStatus);
                 homePolicy.get().setEndDate(endDate);
-
                 homePolicyRepository.save(homePolicy.get());
-                customerRepository.save(customer.get());
             }
-            return "Home Policy with ID " + policyId + " updated successfully.";
-        } else {
-            return "Home Policy with ID " + policyId + " not found.";
+            response.put("success", true);
+            response.put("message", "Home Policy with ID " + policyId + " updated successfully.");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
+        response.put("success", false);
+        response.put("message", "Home Policy with ID " + policyId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
 
@@ -1100,34 +1272,50 @@ public class MainController {
      * @return An iterable collection of all AutoPolicy entities
      */
     @GetMapping(path = RESTNouns.AUTO_POLICY)
-    public @ResponseBody Iterable<AutoPolicy> getAllAutoPolicies() {
-        return autoPolicyRepository.findAll();
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllAutoPolicies() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All auto policies retrieved");
+        response.put("object", autoPolicyRepository.findAll());
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
     @GetMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.ID)
-    public @ResponseBody Optional<AutoPolicy> getAutoPolicyById(@PathVariable("id") Long quoteID) {
-        return autoPolicyRepository.findById(quoteID);
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAutoPolicyById(@PathVariable("id") Long policyId) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Auto policy with ID " + policyId + " retrieved");
+        response.put("object", autoPolicyRepository.findById(policyId));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
-    @GetMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.CUSTOMER + RESTNouns.CUSTOMER_ID)
-    public @ResponseBody Iterable<AutoPolicy> getAllAutoPoliciesByCustomerId(@PathVariable("customer_id") Long customerID) {
-        return autoPolicyRepository.getAllByCustId(customerID);
+    @GetMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.CUSTOMER + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllAutoPoliciesByCustomerId(@PathVariable("id") Long customerID) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All auto policies with customer ID " + customerID + " retrieved");
+        response.put("object", autoPolicyRepository.getAllByCustId(customerID));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
-    @GetMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.ACTIVE + RESTNouns.CUSTOMER_ID)
-    public @ResponseBody Iterable<AutoPolicy> getAllActiveAutoPoliciesByCustomerId(@PathVariable("customer_id") Long customerID) {
-        return autoPolicyRepository.getAllActiveByCustIdAndActive(customerID, true);
+    @GetMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.ACTIVE + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> getAllActiveAutoPoliciesByCustomerId(@PathVariable("id") Long customerID) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All active auto policies with customer ID " + customerID + " retrieved");
+        response.put("object", autoPolicyRepository.getAllActiveByCustIdAndActive(customerID, true));
+        return new ResponseEntity<>(response, HttpStatus.FOUND);
     }
 
-    @PostMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.QUOTE_ID)
-    public @ResponseBody AutoPolicy createAutoPolicyByAutoQuote(
-            @PathVariable("quote_id") Long quoteId,
+    @PostMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> createAutoPolicyByAutoQuote(
+            @PathVariable("id") Long quoteId,
             @RequestParam LocalDate effectiveDate) {
+        Map<String, Object> response = new HashMap<>();
         Optional<AutoQuote> quoteOptional = autoQuoteRepository.findById(quoteId);
-        AutoPolicy policy = null;
         if (quoteOptional.isPresent()) {
             AutoQuote quote = quoteOptional.get();
-            policy = new AutoPolicy();
+            AutoPolicy policy = new AutoPolicy();
             policy.setEffectiveDate(effectiveDate);
             policy.setEndDate(effectiveDate.plusYears(1));
             policy.setPremium(quote.getPremium());
@@ -1136,30 +1324,36 @@ public class MainController {
             policy.setCustId(quote.getCustId());
             policy.setBasePremium(quote.getBasePremium());
             autoPolicyRepository.save(policy);
+            response.put("success", true);
+            response.put("message", "Auto Policy created successfully");
+//            response.put("object", policy);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
-        return policy;
+        response.put("success", false);
+        response.put("message", "Auto Quote with ID " + quoteId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    @PutMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.CUSTOMER_ID + RESTNouns.POLICY_ID)
-    public @ResponseBody String updateAutoPolicyByCustomer(
-            @PathVariable("customer_id") Long customerId,
-            @PathVariable("policy_id") Long policyId,
+    @PutMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.ID)
+    public @ResponseBody ResponseEntity<Map<String, Object>> updateAutoPolicyByCustomer(
+            @PathVariable("id") Long policyId,
             @RequestParam boolean activeStatus,
             @RequestParam LocalDate endDate){
-        if (customerRepository.existsById(customerId) && autoPolicyRepository.existsById(policyId)) {
-            Optional<Customer> customer = customerRepository.findById(customerId);
+        Map<String, Object> response = new HashMap<>();
+        if (autoPolicyRepository.existsById(policyId)) {
             Optional<AutoPolicy> autoPolicy = autoPolicyRepository.findById(policyId);
-            if(customer.isPresent() && autoPolicy.isPresent()){
+            if(autoPolicy.isPresent()){
                 autoPolicy.get().setActive(activeStatus);
                 autoPolicy.get().setEndDate(endDate);
-
                 autoPolicyRepository.save(autoPolicy.get());
-                customerRepository.save(customer.get());
             }
-            return "Auto Policy with ID " + policyId + " updated successfully.";
-        } else {
-            return "Home Policy with ID " + policyId + " not found.";
+            response.put("success", true);
+            response.put("message", "Auto Policy with ID " + policyId + " updated successfully.");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
+        response.put("success", false);
+        response.put("message", "Auto Policy with ID " + policyId + " not found.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
 }
