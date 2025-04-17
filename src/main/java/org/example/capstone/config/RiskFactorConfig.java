@@ -18,11 +18,8 @@ public class RiskFactorConfig {
 
     /**
      * Initializes and returns the {@link RiskFactors} bean.
-     * <ul>
-     *     <li>If the config file exists: it loads and parses it using XStream.</li>
-     *     <li>If the config file does not exist: it creates a new one with default values and persists it.</li>
-     * </ul>
-     *
+     * If the config file exists: it loads and parses it using XStream.
+     * If the config file does not exist: it creates a new one with default values and persists it.
      * @return A {@link RiskFactors} instance populated from XML or default values.
      */
     @Bean

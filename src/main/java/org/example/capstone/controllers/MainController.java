@@ -49,8 +49,7 @@ public class MainController {
 
     /**
      * Retrieves all customers from the database.
-     *
-     * @return An iterable collection of all User entities
+     * @return An iterable collection of all Employee entities
      */
     @GetMapping(path = RESTNouns.CUSTOMER)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllCustomers() {
@@ -58,13 +57,11 @@ public class MainController {
         response.put("success", true);
         response.put("message", "All customers retrieved!");
         response.put("object", customerRepository.findAll());
-        System.out.println(riskFactors.getAutoBasePremium());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
      * Retrieves a specific user by their unique identifier.
-     *
      * @param customerId The unique identifier of the user to retrieve
      * @return An Optional containing the User if found, or an empty Optional
      */
@@ -79,7 +76,6 @@ public class MainController {
 
     /**
      * Retrieves customers by their first and last name.
-     *
      * @param firstName The first name of the customer.
      * @param lastName  The last name of the customer.
      * @return A list of customers with the specified name.
@@ -97,7 +93,6 @@ public class MainController {
 
     /**
      * Retrieves customers by their email.
-     *
      * @param email The email address to search.
      * @return A list of customers with the provided email.
      */
@@ -113,7 +108,6 @@ public class MainController {
 
     /**
      * Registers a new customer account. Requires a valid address ID.
-     *
      * @param firstName The first name of the customer.
      * @param lastName  The last name of the customer.
      * @param birthday  The birthday of the customer.
@@ -159,7 +153,6 @@ public class MainController {
 
     /**
      * Authenticates a customer login by verifying username and password.
-     *
      * @param username The login username.
      * @param password The plain-text password.
      * @return A ResponseEntity indicating success or unauthorized.
@@ -185,7 +178,6 @@ public class MainController {
 
     /**
      * Updates a customer's basic info and address.
-     *
      * @param customerId The ID of the customer to update.
      * @param firstName  The new first name.
      * @param lastName   The new last name.
@@ -230,7 +222,6 @@ public class MainController {
 
     /**
      * Allows a customer to reset their password securely.
-     *
      * @param customerId  The ID of the customer.
      * @param oldPassword The current password.
      * @param newPassword The new password.
@@ -264,7 +255,6 @@ public class MainController {
 
     /**
      * Deletes a customer from the database by their unique identifier.
-     *
      * @param customerId The unique identifier of the user to delete
      * @return A string message indicating the result of the deletion operation
      */
@@ -287,7 +277,6 @@ public class MainController {
 
     /**
      * Retrieves all employees in the system.
-     *
      * @return A ResponseEntity containing all employees and a success message.
      */
     @GetMapping(path = RESTNouns.EMPLOYEE)
@@ -301,7 +290,6 @@ public class MainController {
 
     /**
      * Authenticates an employee login using username and password.
-     *
      * @param username The employee's username.
      * @param password The plain-text password.
      * @return A ResponseEntity indicating login success or failure.
@@ -326,7 +314,6 @@ public class MainController {
 
     /**
      * Updates an employee's first and last name by their ID.
-     *
      * @param employeeId The ID of the employee to update.
      * @param firstName  The updated first name.
      * @param lastName   The updated last name.
@@ -357,7 +344,6 @@ public class MainController {
 
     /**
      * Allows an employee to update a customer’s profile details by customer ID.
-     *
      * @param customerId The ID of the customer.
      * @param firstName  The updated first name.
      * @param lastName   The updated last name.
@@ -404,7 +390,6 @@ public class MainController {
 
     /**
      * Allows an employee to securely reset their password using their old password.
-     *
      * @param employeeId  The ID of the employee.
      * @param oldPassword The current password for verification.
      * @param newPassword The new password to be encrypted and saved.
@@ -440,7 +425,6 @@ public class MainController {
 
     /**
      * Retrieves the current risk factors configuration.
-     *
      * @return A ResponseEntity containing all risk factor values used in premium calculations.
      */
     @GetMapping(path = RESTNouns.ADMIN + RESTNouns.RISK)
@@ -454,7 +438,6 @@ public class MainController {
 
     /**
      * Registers a new employee in the system. Username must be unique.
-     *
      * @param firstName The employee's first name.
      * @param lastName  The employee's last name.
      * @param email     The employee's email address.
@@ -493,13 +476,13 @@ public class MainController {
 
     /**
      * Updates employee information by admin.
-     *
      * @param employeeId The ID of the employee to update.
      * @param firstName  The updated first name.
      * @param lastName   The updated last name.
      * @param email      The updated email address.
      * @param username   The updated username.
      * @param password   The new password (to be encrypted).
+     * @param admin      Whether the employee should be an admin.
      * @return A ResponseEntity indicating update success or failure.
      */
     @PutMapping(path = RESTNouns.ADMIN + RESTNouns.ID)
@@ -509,7 +492,8 @@ public class MainController {
             @RequestParam String lastName,
             @RequestParam String email,
             @RequestParam String username,
-            @RequestParam String password){
+            @RequestParam String password,
+            @RequestParam boolean admin){
         Map<String, Object> response = new HashMap<>();
         if (employeeRepository.existsById(employeeId)) {
             Optional<Employee> employee = employeeRepository.findById(employeeId);
@@ -519,6 +503,7 @@ public class MainController {
                 employee.get().setEmail(email);
                 employee.get().setUsername(username);
                 employee.get().setPassword(passwordEncryptor.encryptPassword(password));
+                employee.get().setAdmin(admin);
                 employeeRepository.save(employee.get());
             }
             response.put("success", true);
@@ -534,7 +519,6 @@ public class MainController {
     /**
      * Updates risk factors used in quote and policy premium calculations.
      * Also writes the updated configuration to an XML file using XStream.
-     *
      * @param rf The updated RiskFactors object.
      * @return A ResponseEntity indicating success or failure of the update operation.
      */
@@ -564,7 +548,6 @@ public class MainController {
 
     /**
      * Deletes a customer from the database by their unique identifier.
-     *
      * @param employeeId The unique identifier of the user to delete
      * @return A string message indicating the result of the deletion operation
      */
@@ -587,7 +570,6 @@ public class MainController {
 
     /**
      * Retrieves all homes stored in the system.
-     *
      * @return A ResponseEntity containing a list of all homes.
      */
     @GetMapping(path = RESTNouns.HOME)
@@ -601,7 +583,6 @@ public class MainController {
 
     /**
      * Retrieves all homes associated with a specific customer.
-     *
      * @param customerId The ID of the customer.
      * @return A ResponseEntity containing the list of homes or a not found error.
      */
@@ -625,7 +606,6 @@ public class MainController {
 
     /**
      * Creates a new home linked to a customer and an address.
-     *
      * @param addressId     The ID of the address.
      * @param customerId    The ID of the customer.
      * @param dateBuilt     The date the home was built.
@@ -671,7 +651,6 @@ public class MainController {
 
     /**
      * Updates an existing home's information.
-     *
      * @param homeId        The ID of the home to update.
      * @param dateBuilt     The updated date built.
      * @param homeValue     The updated home value.
@@ -722,7 +701,6 @@ public class MainController {
 
     /**
      * Deletes a specific home associated with a user.
-     *
      * @param homeId The unique identifier of the home to be deleted
      * @return A string message indicating the result of the deletion operation
      */
@@ -746,7 +724,6 @@ public class MainController {
 
     /**
      * Retrieves all addresses stored in the system.
-     *
      * @return A ResponseEntity containing all addresses.
      */
     @GetMapping(path = RESTNouns.ADDRESS)
@@ -760,7 +737,6 @@ public class MainController {
 
     /**
      * Retrieves an address by its ID.
-     *
      * @param addressId The ID of the address to retrieve.
      * @return A ResponseEntity containing the address or a not found error.
      */
@@ -775,7 +751,6 @@ public class MainController {
 
     /**
      * Creates a new address or returns an existing one if duplicate found.
-     *
      * @param unit        The unit number.
      * @param street      The street name.
      * @param city        The city name.
@@ -815,7 +790,6 @@ public class MainController {
 
     /**
      * Updates an address by its ID.
-     *
      * @param addressId   The ID of the address to update.
      * @param unit        The new unit number.
      * @param street      The new street name.
@@ -855,7 +829,6 @@ public class MainController {
 
     /**
      * Deletes an address by its ID.
-     *
      * @param addressId The ID of the address to delete.
      * @return A ResponseEntity indicating success or not found.
      */
@@ -879,7 +852,6 @@ public class MainController {
 
     /**
      * Retrieves all autos stored in the system.
-     *
      * @return A ResponseEntity containing all auto records.
      */
     @GetMapping(path = RESTNouns.AUTO)
@@ -893,7 +865,6 @@ public class MainController {
 
     /**
      * Retrieves all auto objects associated with a specific user.
-     *
      * @param customerId The unique identifier of the user whose auto objects are to be retrieved
      * @return An iterable collection of Auto entities belonging to the specified user,
      *         or null if the user does not exist
@@ -918,7 +889,6 @@ public class MainController {
 
     /**
      * Creates a new auto record linked to a customer.
-     *
      * @param customerId The ID of the customer.
      * @param make       The vehicle make (e.g., Toyota).
      * @param model      The vehicle model (e.g., Corolla).
@@ -954,7 +924,6 @@ public class MainController {
 
     /**
      * Updates an auto record by its ID.
-     *
      * @param autoId The ID of the auto to update.
      * @param make   The updated make.
      * @param model  The updated model.
@@ -988,7 +957,6 @@ public class MainController {
 
     /**
      * Deletes a specific auto object associated with a customer.
-     *
      * @param autoId The unique identifier of the auto to be deleted
      * @return A string message indicating the result of the deletion operation
      */
@@ -1011,7 +979,6 @@ public class MainController {
 
     /**
      * Retrieves all accident records in the system.
-     *
      * @return A ResponseEntity containing all accidents.
      */
     @GetMapping(path = RESTNouns.ACCIDENT)
@@ -1025,7 +992,6 @@ public class MainController {
 
     /**
      * Retrieves a specific accident by its ID.
-     *
      * @param accidentID The ID of the accident to retrieve.
      * @return A ResponseEntity containing the accident or not found message.
      */
@@ -1033,14 +999,13 @@ public class MainController {
         public @ResponseBody ResponseEntity<Map<String, Object>> getAccidentById(@PathVariable("id") Long accidentID) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "All accidents with ID "+ accidentID +" retrieved!");
+        response.put("message", "Accident with ID "+ accidentID +" retrieved!");
         response.put("object", accidentsRepository.findById(accidentID));
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
     /**
      * Creates a new accident record for a specific customer.
-     *
      * @param customerId     The ID of the customer involved.
      * @param dateOfAccident The date the accident occurred.
      * @return A ResponseEntity indicating success or not found if customer is missing.
@@ -1070,7 +1035,6 @@ public class MainController {
 
     /**
      * Updates the date of an existing accident.
-     *
      * @param accidentId     The ID of the accident to update.
      * @param dateOfAccident The new date of the accident.
      * @return A ResponseEntity indicating update success or failure.
@@ -1097,7 +1061,6 @@ public class MainController {
 
     /**
      * Deletes an accident record by its ID.
-     *
      * @param accidentId The ID of the accident to delete.
      * @return A ResponseEntity indicating success or failure of the deletion.
      */
@@ -1120,7 +1083,6 @@ public class MainController {
 
     /**
      * Retrieves all home insurance quotes.
-     *
      * @return A ResponseEntity containing all home quotes.
      */
     @GetMapping(path = RESTNouns.HOME_QUOTE)
@@ -1134,7 +1096,6 @@ public class MainController {
 
     /**
      * Retrieves a home quote by its ID.
-     *
      * @param quoteID The ID of the home quote.
      * @return A ResponseEntity containing the quote or a not found message.
      */
@@ -1149,7 +1110,6 @@ public class MainController {
 
     /**
      * Retrieves all home quotes for a specific customer.
-     *
      * @param customerID The customer's ID.
      * @return A ResponseEntity containing the list of quotes.
      */
@@ -1164,7 +1124,6 @@ public class MainController {
 
     /**
      * Retrieves only active home quotes for a customer.
-     *
      * @param customerID The customer's ID.
      * @return A ResponseEntity containing the list of active quotes.
      */
@@ -1179,7 +1138,6 @@ public class MainController {
 
     /**
      * Creates a new home insurance quote based on customer and home information.
-     *
      * @param customerId    The ID of the customer.
      * @param homeId        The ID of the home.
      * @param liability     The liability limit (e.g., 1000000 or 2000000).
@@ -1265,7 +1223,6 @@ public class MainController {
 
     /**
      * Sets the active status of a home quote.
-     *
      * @param quoteId      The ID of the home quote.
      * @param activeStatus True to activate, false to deactivate.
      * @return A ResponseEntity indicating the result of the update.
@@ -1295,7 +1252,6 @@ public class MainController {
 
     /**
      * Retrieves all auto insurance quotes in the system.
-     *
      * @return A ResponseEntity containing a list of all auto quotes.
      */
     @GetMapping(path = RESTNouns.AUTO_QUOTE)
@@ -1309,7 +1265,6 @@ public class MainController {
 
     /**
      * Retrieves a specific auto quote by ID.
-     *
      * @param quoteID The ID of the quote.
      * @return A ResponseEntity containing the quote or a not found message.
      */
@@ -1324,7 +1279,6 @@ public class MainController {
 
     /**
      * Retrieves all auto quotes for a specific customer.
-     *
      * @param customerID The ID of the customer.
      * @return A ResponseEntity with the list of quotes.
      */
@@ -1339,7 +1293,6 @@ public class MainController {
 
     /**
      * Retrieves all active auto quotes for a specific customer.
-     *
      * @param customerID The ID of the customer.
      * @return A ResponseEntity with the list of active quotes.
      */
@@ -1354,7 +1307,6 @@ public class MainController {
 
     /**
      * Creates a new auto insurance quote for a customer and vehicle.
-     *
      * @param customerId    The ID of the customer.
      * @param autoId        The ID of the vehicle.
      * @param packagedQuote True if the customer is bundling with a home policy.
@@ -1434,7 +1386,6 @@ public class MainController {
 
     /**
      * Updates the active status of an auto quote.
-     *
      * @param quoteId      The ID of the auto quote.
      * @param activeStatus True to activate, false to deactivate.
      * @return A ResponseEntity indicating success or failure.
@@ -1464,7 +1415,6 @@ public class MainController {
 
     /**
      * Retrieves all home insurance policies in the system.
-     *
      * @return A ResponseEntity containing all home policies.
      */
     @GetMapping(path = RESTNouns.HOME_POLICY)
@@ -1478,7 +1428,6 @@ public class MainController {
 
     /**
      * Retrieves a specific home policy by its ID.
-     *
      * @param policyId The ID of the home policy.
      * @return A ResponseEntity containing the policy or not found message.
      */
@@ -1493,7 +1442,6 @@ public class MainController {
 
     /**
      * Retrieves all home policies for a specific customer.
-     *
      * @param customerID The customer's ID.
      * @return A ResponseEntity containing the list of policies.
      */
@@ -1508,7 +1456,6 @@ public class MainController {
 
     /**
      * Retrieves only active home policies for a customer.
-     *
      * @param customerID The customer's ID.
      * @return A ResponseEntity containing active home policies.
      */
@@ -1523,7 +1470,6 @@ public class MainController {
 
     /**
      * Creates a new home insurance policy based on an existing quote.
-     *
      * @param quoteId       The ID of the home quote.
      * @param effectiveDate The start date of the policy.
      * @return A ResponseEntity indicating success or not found.
@@ -1560,7 +1506,6 @@ public class MainController {
 
     /**
      * Updates the end date and active status of a home policy.
-     *
      * @param policyId   The ID of the policy.
      * @param activeStatus True to activate, false to deactivate.
      * @param endDate    The updated end date.
@@ -1593,7 +1538,6 @@ public class MainController {
 
     /**
      * Retrieves all auto insurance policies.
-     *
      * @return A ResponseEntity containing all auto policies.
      */
     @GetMapping(path = RESTNouns.AUTO_POLICY)
@@ -1607,7 +1551,6 @@ public class MainController {
 
     /**
      * Retrieves a specific auto policy by ID.
-     *
      * @param policyId The ID of the auto policy.
      * @return A ResponseEntity containing the policy or not found message.
      */
@@ -1622,7 +1565,6 @@ public class MainController {
 
     /**
      * Retrieves all auto policies for a customer.
-     *
      * @param customerID The ID of the customer.
      * @return A ResponseEntity containing the customer's auto policies.
      */
@@ -1637,7 +1579,6 @@ public class MainController {
 
     /**
      * Retrieves all active auto policies for a customer.
-     *
      * @param customerID The ID of the customer.
      * @return A ResponseEntity containing only active policies.
      */
@@ -1652,7 +1593,6 @@ public class MainController {
 
     /**
      * Creates a new auto insurance policy based on an existing auto quote.
-     *
      * @param quoteId       The ID of the auto quote.
      * @param effectiveDate The start date of the policy.
      * @return A ResponseEntity with the created policy or not found error.
@@ -1688,7 +1628,6 @@ public class MainController {
 
     /**
      * Updates an auto policy's active status and end date.
-     *
      * @param policyId     The ID of the policy to update.
      * @param activeStatus True to activate, false to deactivate.
      * @param endDate      The updated end date.

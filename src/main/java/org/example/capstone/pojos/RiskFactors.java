@@ -49,7 +49,6 @@ public class RiskFactors {
 
     /**
      * Gets the discount multiplier when both auto and home policies are purchased.
-     *
      * @return the discount multiplier.
      */
     public double getDiscountForBoth() {
@@ -58,7 +57,6 @@ public class RiskFactors {
 
     /**
      * Sets the discount multiplier for bundling auto and home policies.
-     *
      * @param discountForBoth the discount value to set.
      */
     public void setDiscountForBoth(double discountForBoth) {
@@ -67,7 +65,6 @@ public class RiskFactors {
 
     /**
      * Gets the current tax rate applied to premiums.
-     *
      * @return the tax rate.
      */
     public double getTaxRate() {
@@ -76,7 +73,6 @@ public class RiskFactors {
 
     /**
      * Sets the tax rate to apply to premiums.
-     *
      * @param taxRate the tax rate to set.
      */
     public void setTaxRate(double taxRate) {
@@ -89,7 +85,6 @@ public class RiskFactors {
 
     /**
      * Gets the base premium for home insurance.
-     *
      * @return the base premium.
      */
     public int getHomeBasePremium() {
@@ -98,7 +93,6 @@ public class RiskFactors {
 
     /**
      * Sets the base premium for home insurance.
-     *
      * @param homeBasePremium the value to set.
      */
     public void setHomeBasePremium(int homeBasePremium) {
@@ -107,7 +101,6 @@ public class RiskFactors {
 
     /**
      * Gets the percentage applied to home values above the baseline.
-     *
      * @return the value percentage.
      */
     public double getHomeValuePercentage() {
@@ -116,7 +109,6 @@ public class RiskFactors {
 
     /**
      * Gets the percentage applied to home values above the baseline.
-     *
      * @return the value percentage.
      */
     public void setHomeValuePercentage(double homeValuePercentage) {
@@ -125,7 +117,6 @@ public class RiskFactors {
 
     /**
      * Gets the value baseline threshold for applying extra charges.
-     *
      * @return the baseline amount.
      */
     public int getHomeValueBaseLine() {
@@ -134,7 +125,6 @@ public class RiskFactors {
 
     /**
      * Sets the value baseline threshold.
-     *
      * @param homeValueBaseLine the baseline to set.
      */
     public void setHomeValueBaseLine(int homeValueBaseLine) {
@@ -143,7 +133,6 @@ public class RiskFactors {
 
     /**
      * Gets the multiplier for high liability policies.
-     *
      * @return the multiplier.
      */
     public double getHighLiability() {
@@ -152,7 +141,6 @@ public class RiskFactors {
 
     /**
      * Sets the multiplier for high liability policies.
-     *
      * @param highLiability the multiplier to set.
      */
     public void setHighLiability(double highLiability) {

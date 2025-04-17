@@ -2,7 +2,6 @@ package org.example.capstone.controllers;
 
 /**
  * Defines constants used throughout the REST API for routing and path consistency.
- * <p>
  * This class centralizes all endpoint path segments to reduce duplication,
  * improve readability, and support consistent naming across controllers.
  */

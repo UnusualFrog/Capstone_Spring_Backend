@@ -6,7 +6,6 @@ import java.time.LocalDate;
 
 /**
  * Represents an auto insurance quote generated for a specific {@link Auto}.
- * <p>
  * Includes premium information, generation date, active status, tax rate, and customer reference.
  */
 @Entity

@@ -1,5 +1,6 @@
 package org.example.capstone.pojos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -7,7 +8,6 @@ import jakarta.persistence.Id;
 
 /**
  * Represents an employee in the system.
- * <p>
  * Contains user credentials and a flag to identify administrator privileges.
  */
 @Entity
@@ -23,7 +23,7 @@ public class Employee {
     private String lastName;
     private String email;
     private String username;
-    // @JsonIgnore //hides from json / removable if necessary
+    @JsonIgnore //hides from json / removable if necessary
     private String password;
 
     /**
@@ -33,7 +33,6 @@ public class Employee {
 
     /**
      * Gets the employee ID.
-     *
      * @return The unique employee ID.
      */
     public Integer getId() {
@@ -42,7 +41,6 @@ public class Employee {
 
     /**
      * Sets the employee ID.
-     *
      * @param id The ID to assign.
      */
     public void setId(Integer id) {
@@ -51,7 +49,6 @@ public class Employee {
 
     /**
      * Gets the first name of the employee.
-     *
      * @return First name string.
      */
     public String getFirstName() {
@@ -60,7 +57,6 @@ public class Employee {
 
     /**
      * Sets the first name of the employee.
-     *
      * @param firstName The first name to set.
      */
     public void setFirstName(String firstName) {
@@ -69,7 +65,6 @@ public class Employee {
 
     /**
      * Gets the last name of the employee.
-     *
      * @return Last name string.
      */
     public String getLastName() {
@@ -78,7 +73,6 @@ public class Employee {
 
     /**
      * Sets the last name of the employee.
-     *
      * @param lastName The last name to set.
      */
     public void setLastName(String lastName) {
@@ -87,7 +81,6 @@ public class Employee {
 
     /**
      * Gets the email address of the employee.
-     *
      * @return Email string.
      */
     public String getEmail() {
@@ -96,7 +89,6 @@ public class Employee {
 
     /**
      * Sets the email address.
-     *
      * @param email The email to assign.
      */
     public void setEmail(String email) {
@@ -105,7 +97,6 @@ public class Employee {
 
     /**
      * Gets the username used for login.
-     *
      * @return The username string.
      */
     public String getUsername() {
@@ -114,7 +105,6 @@ public class Employee {
 
     /**
      * Sets the login username.
-     *
      * @param username The username to assign.
      */
     public void setUsername(String username) {
@@ -123,7 +113,6 @@ public class Employee {
 
     /**
      * Gets the employee's encrypted password.
-     *
      * @return The password string.
      */
     public String getPassword() {
@@ -132,7 +121,6 @@ public class Employee {
 
     /**
      * Sets the employee's encrypted password.
-     *
      * @param password The encrypted password to set.
      */
     public void setPassword(String password) {
@@ -141,7 +129,6 @@ public class Employee {
 
     /**
      * Checks if the employee has admin privileges.
-     *
      * @return True if admin, false otherwise.
      */
     public boolean isAdmin() {
@@ -150,7 +137,6 @@ public class Employee {
 
     /**
      * Sets the admin privilege flag.
-     *
      * @param admin True to grant admin access, false to revoke.
      */
     public void setAdmin(boolean admin) {

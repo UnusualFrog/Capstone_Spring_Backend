@@ -5,7 +5,6 @@ import java.time.LocalDate;
 
 /**
  * Represents a record of an accident associated with a {@link Customer}.
- * <p>
  * Used in insurance quote and policy calculations.
  */
 @Entity
@@ -33,7 +32,6 @@ public class Accident {
 
     /**
      * Gets the accident ID.
-     *
      * @return The ID of the accident.
      */
     public Integer getId() {
@@ -42,7 +40,6 @@ public class Accident {
 
     /**
      * Sets the accident ID.
-     *
      * @param id The new ID to set.
      */
     public void setId(Integer id) {
@@ -51,7 +48,6 @@ public class Accident {
 
     /**
      * Gets the date of the accident.
-     *
      * @return The {@link LocalDate} the accident occurred.
      */
     public LocalDate getDate() {
@@ -60,7 +56,6 @@ public class Accident {
 
     /**
      * Sets the date of the accident.
-     *
      * @param date The {@link LocalDate} the accident occurred.
      */
     public void setDate(LocalDate date) {
@@ -69,7 +64,6 @@ public class Accident {
 
     /**
      * Gets the customer associated with this accident.
-     *
      * @return The {@link Customer} involved.
      */
     public Customer getCustomer() {
@@ -78,7 +72,6 @@ public class Accident {
 
     /**
      * Sets the customer associated with this accident.
-     *
      * @param customer The {@link Customer} to associate.
      */
     public void setCustomer(Customer customer) {

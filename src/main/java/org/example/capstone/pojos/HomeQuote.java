@@ -6,7 +6,6 @@ import java.time.LocalDate;
 
 /**
  * Represents a quote for home insurance coverage.
- * <p>
  * Contains details such as premium amount, liability limit, generation date,
  * associated home, and the customer who received the quote.
  */
@@ -32,7 +31,6 @@ public class HomeQuote {
 
     /**
      * Gets the ID of the quote.
-     *
      * @return The quote ID.
      */
     public int getId() {
@@ -41,7 +39,6 @@ public class HomeQuote {
 
     /**
      * Sets the ID of the quote.
-     *
      * @param id The quote ID to assign.
      */
     public void setId(int id) {
@@ -50,7 +47,6 @@ public class HomeQuote {
 
     /**
      * Gets the date this quote was generated.
-     *
      * @return The generation date.
      */
     public LocalDate getGenerationDate() {
@@ -59,7 +55,6 @@ public class HomeQuote {
 
     /**
      * Sets the generation date of the quote.
-     *
      * @param generationDate The date to assign.
      */
     public void setGenerationDate(LocalDate generationDate) {
@@ -68,7 +63,6 @@ public class HomeQuote {
 
     /**
      * Checks whether this quote is active.
-     *
      * @return True if active; false otherwise.
      */
     public boolean getActive() {
@@ -77,7 +71,6 @@ public class HomeQuote {
 
     /**
      * Sets the active status of the quote.
-     *
      * @param active True to mark as active; false otherwise.
      */
     public void setActive(boolean active) {
@@ -86,7 +79,6 @@ public class HomeQuote {
 
     /**
      * Gets the full premium cost (with tax).
-     *
      * @return The premium amount.
      */
     public double getPremium() {
@@ -95,7 +87,6 @@ public class HomeQuote {
 
     /**
      * Sets the full premium cost.
-     *
      * @param premium The amount to set.
      */
     public void setPremium(double premium) {
@@ -104,7 +95,6 @@ public class HomeQuote {
 
     /**
      * Gets the liability limit of the quote.
-     *
      * @return The liability coverage amount.
      */
     public int getLiabilityLimit() {
@@ -113,7 +103,6 @@ public class HomeQuote {
 
     /**
      * Sets the liability limit of the quote.
-     *
      * @param liabilityLimit The coverage amount to assign.
      */
     public void setLiabilityLimit(int liabilityLimit) {
@@ -122,7 +111,6 @@ public class HomeQuote {
 
     /**
      * Gets the tax rate applied to this quote.
-     *
      * @return The tax rate percentage.
      */
     public double getTaxRate() {
@@ -131,7 +119,6 @@ public class HomeQuote {
 
     /**
      * Sets the tax rate applied to this quote.
-     *
      * @param taxRate The tax rate to assign.
      */
     public void setTaxRate(double taxRate) {
@@ -140,7 +127,6 @@ public class HomeQuote {
 
     /**
      * Gets the associated {@link Home} entity.
-     *
      * @return The home for which the quote is generated.
      */
     public Home getHome() {
@@ -149,7 +135,6 @@ public class HomeQuote {
 
     /**
      * Sets the associated home for the quote.
-     *
      * @param home The {@link Home} to assign.
      */
     public void setHome(Home home) {
@@ -158,7 +143,6 @@ public class HomeQuote {
 
     /**
      * Gets the base premium before tax or modifiers.
-     *
      * @return The base premium.
      */
     public double getBasePremium() {
@@ -167,7 +151,6 @@ public class HomeQuote {
 
     /**
      * Sets the base premium before adjustments.
-     *
      * @param basePremium The base premium to assign.
      */
     public void setBasePremium(double basePremium) {
@@ -176,7 +159,6 @@ public class HomeQuote {
 
     /**
      * Gets the customer ID associated with this quote.
-     *
      * @return The customer ID.
      */
     public int getCustId() {
@@ -185,7 +167,6 @@ public class HomeQuote {
 
     /**
      * Sets the customer ID for this quote.
-     *
      * @param custId The customer ID to assign.
      */
     public void setCustId(int custId) {

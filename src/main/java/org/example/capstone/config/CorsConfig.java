@@ -7,7 +7,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * Configuration class for setting up Cross-Origin Resource Sharing (CORS) rules.
- * <p>
  * This config allows the frontend (e.g., React on http://localhost:3000)
  * to communicate with the Spring Boot backend.
  */
@@ -16,7 +15,6 @@ public class CorsConfig {
 
     /**
      * Defines global CORS configuration for the application.
-     *
      * @return WebMvcConfigurer instance with configured CORS mappings.
      */
     @Bean

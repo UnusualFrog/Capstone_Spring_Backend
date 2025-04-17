@@ -7,7 +7,6 @@ import java.time.LocalDate;
 
 /**
  * Represents an insurance policy for a {@link Home}.
- * <p>
  * Contains information on premium, coverage period, liability, customer, and policy status.
  */
 @Entity
@@ -35,7 +34,6 @@ public class HomePolicy {
 
     /**
      * Gets the policy ID.
-     *
      * @return The unique policy ID.
      */
     public int getId() {
@@ -44,7 +42,6 @@ public class HomePolicy {
 
     /**
      * Sets the policy ID.
-     *
      * @param id The ID to assign.
      */
     public void setId(int id) {
@@ -53,7 +50,6 @@ public class HomePolicy {
 
     /**
      * Gets the effective (start) date of the policy.
-     *
      * @return The start date.
      */
     public LocalDate getEffectiveDate() {
@@ -62,7 +58,6 @@ public class HomePolicy {
 
     /**
      * Sets the effective (start) date of the policy.
-     *
      * @param effectiveDate The start date to assign.
      */
     public void setEffectiveDate(LocalDate effectiveDate) {
@@ -71,7 +66,6 @@ public class HomePolicy {
 
     /**
      * Gets the end date of the policy.
-     *
      * @return The end date.
      */
     public LocalDate getEndDate() {
@@ -80,7 +74,6 @@ public class HomePolicy {
 
     /**
      * Sets the end date of the policy.
-     *
      * @param endDate The end date to assign.
      */
     public void setEndDate(LocalDate endDate) {
@@ -89,7 +82,6 @@ public class HomePolicy {
 
     /**
      * Gets the total premium (with tax).
-     *
      * @return The premium amount.
      */
     public double getPremium() {
@@ -98,7 +90,6 @@ public class HomePolicy {
 
     /**
      * Sets the total premium (with tax).
-     *
      * @param premium The premium amount to assign.
      */
     public void setPremium(double premium) {
@@ -107,7 +98,6 @@ public class HomePolicy {
 
     /**
      * Gets the liability limit of the policy.
-     *
      * @return The liability amount.
      */
     public int getLiabilityLimit() {
@@ -116,7 +106,6 @@ public class HomePolicy {
 
     /**
      * Sets the liability limit of the policy.
-     *
      * @param liabilityLimit The liability amount to assign.
      */
     public void setLiabilityLimit(int liabilityLimit) {
@@ -125,7 +114,6 @@ public class HomePolicy {
 
     /**
      * Gets the tax rate applied to the policy.
-     *
      * @return The tax rate.
      */
     public double getTaxRate() {
@@ -134,7 +122,6 @@ public class HomePolicy {
 
     /**
      * Sets the tax rate applied to the policy.
-     *
      * @param taxRate The tax rate to assign.
      */
     public void setTaxRate(double taxRate) {
@@ -143,7 +130,6 @@ public class HomePolicy {
 
     /**
      * Checks if the policy is currently active.
-     *
      * @return True if active, false otherwise.
      */
     public boolean getActive() {
@@ -152,7 +138,6 @@ public class HomePolicy {
 
     /**
      * Sets the active status of the policy.
-     *
      * @param active True to activate; false to deactivate.
      */
     public void setActive(boolean active) {
@@ -161,7 +146,6 @@ public class HomePolicy {
 
     /**
      * Gets the associated home for this policy.
-     *
      * @return The {@link Home} object.
      */
     public Home getHome() {
@@ -170,7 +154,6 @@ public class HomePolicy {
 
     /**
      * Sets the associated home for this policy.
-     *
      * @param home The {@link Home} to associate.
      */
     public void setHome(Home home) {
@@ -179,7 +162,6 @@ public class HomePolicy {
 
     /**
      * Gets the customer ID who owns this policy.
-     *
      * @return The customer ID.
      */
     public int getCustId() {
@@ -188,7 +170,6 @@ public class HomePolicy {
 
     /**
      * Sets the customer ID for this policy.
-     *
      * @param custId The customer ID to assign.
      */
     public void setCustId(int custId) {
@@ -197,7 +178,6 @@ public class HomePolicy {
 
     /**
      * Gets the base premium before tax or discounts.
-     *
      * @return The base premium.
      */
     public double getBasePremium() {
@@ -206,7 +186,6 @@ public class HomePolicy {
 
     /**
      * Sets the base premium amount.
-     *
      * @param basePremium The base premium to assign.
      */
     public void setBasePremium(double basePremium) {

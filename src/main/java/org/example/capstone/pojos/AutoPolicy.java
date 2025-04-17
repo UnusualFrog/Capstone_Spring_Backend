@@ -6,7 +6,6 @@ import java.time.LocalDate;
 
 /**
  * Represents an auto insurance policy associated with a specific {@link Auto}.
- * <p>
  * Contains policy details such as premium, effective and end dates, tax rate, and customer linkage.
  */
 @Entity

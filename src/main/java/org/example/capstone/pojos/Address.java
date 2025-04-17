@@ -7,7 +7,6 @@ import jakarta.persistence.Id;
 
 /**
  * Represents a physical address used for customers, homes, or policies.
- * <p>
  * Contains unit number, street, city, province, and postal code information.
  */
 @Entity
@@ -47,7 +46,6 @@ public class Address {
 
     /**
      * Gets the ID of the address.
-     *
      * @return The address ID.
      */
     public Integer getId() {
@@ -56,7 +54,6 @@ public class Address {
 
     /**
      * Sets the ID of the address.
-     *
      * @param id The address ID to set.
      */
     public void setId(Integer id) {
@@ -65,7 +62,6 @@ public class Address {
 
     /**
      * Returns a formatted address string.
-     *
      * @return The address as a readable string.
      */
     public String toString() {
@@ -74,7 +70,6 @@ public class Address {
 
     /**
      * Gets the unit number.
-     *
      * @return The unit or apartment number.
      */
     public Integer getUnit() {
@@ -83,7 +78,6 @@ public class Address {
 
     /**
      * Sets the unit number.
-     *
      * @param unit The unit or apartment number.
      */
     public void setUnit(Integer unit) {
@@ -92,7 +86,6 @@ public class Address {
 
     /**
      * Gets the street name.
-     *
      * @return The street.
      */
     public String getStreet() {
@@ -101,7 +94,6 @@ public class Address {
 
     /**
      * Sets the street name.
-     *
      * @param street The street to set.
      */
     public void setStreet(String street) {
@@ -110,7 +102,6 @@ public class Address {
 
     /**
      * Gets the city name.
-     *
      * @return The city.
      */
     public String getCity() {
@@ -119,7 +110,6 @@ public class Address {
 
     /**
      * Sets the city name.
-     *
      * @param city The city to set.
      */
     public void setCity(String city) {
@@ -128,7 +118,6 @@ public class Address {
 
     /**
      * Gets the province name.
-     *
      * @return The province or state.
      */
     public String getProvince() {
@@ -137,7 +126,6 @@ public class Address {
 
     /**
      * Sets the province name.
-     *
      * @param province The province or state to set.
      */
     public void setProvince(String province) {
@@ -146,7 +134,6 @@ public class Address {
 
     /**
      * Gets the postal code.
-     *
      * @return The postal or ZIP code.
      */
     public String getPostalCode() {
@@ -155,7 +142,6 @@ public class Address {
 
     /**
      * Sets the postal code.
-     *
      * @param zip The postal or ZIP code to set.
      */
     public void setPostalCode(String zip) {

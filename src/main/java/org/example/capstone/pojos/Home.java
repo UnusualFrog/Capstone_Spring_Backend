@@ -40,7 +40,6 @@ public class Home {
 
     /**
      * Gets the home ID.
-     *
      * @return The unique home ID.
      */
     public Integer getId() {
@@ -49,7 +48,6 @@ public class Home {
 
     /**
      * Gets the home ID.
-     *
      * @return The unique home ID.
      */
     public void setId(Integer id) {
@@ -58,7 +56,6 @@ public class Home {
 
     /**
      * Gets the construction date of the home.
-     *
      * @return The date built.
      */
     public LocalDate getDateBuilt() {
@@ -67,7 +64,6 @@ public class Home {
 
     /**
      * Sets the construction date of the home.
-     *
      * @param yearBuilt The {@link LocalDate} the home was built.
      */
     public void setDateBuilt(LocalDate yearBuilt) {
@@ -76,7 +72,6 @@ public class Home {
 
     /**
      * Gets the heating type used in the home.
-     *
      * @return The heating type.
      */
     public HeatingType getHeatingType() {
@@ -85,7 +80,6 @@ public class Home {
 
     /**
      * Sets the heating type used in the home.
-     *
      * @param heatingType The heating type to set.
      */
     public void setHeatingType(HeatingType heatingType) {
@@ -94,7 +88,6 @@ public class Home {
 
     /**
      * Gets the location type (urban or rural).
-     *
      * @return The location type.
      */
     public Location getLocation() {
@@ -103,7 +96,6 @@ public class Home {
 
     /**
      * Sets the location type.
-     *
      * @param location The location enum to assign.
      */
     public void setLocation(Location location) {
@@ -112,7 +104,6 @@ public class Home {
 
     /**
      * Gets the customer who owns this home.
-     *
      * @return The associated {@link Customer}.
      */
     public Customer getCustomer() {
@@ -121,7 +112,6 @@ public class Home {
 
     /**
      * Sets the customer who owns this home.
-     *
      * @param customer The {@link Customer} to assign.
      */
     public void setCustomer(Customer customer) {
@@ -130,7 +120,6 @@ public class Home {
 
     /**
      * Gets the declared value of the home.
-     *
      * @return The home value.
      */
     public double getHomeValue() {
@@ -139,7 +128,6 @@ public class Home {
 
     /**
      * Sets the declared value of the home.
-     *
      * @param homeValue The monetary value.
      */
     public void setHomeValue(double homeValue) {
@@ -148,7 +136,6 @@ public class Home {
 
     /**
      * Gets the address associated with the home.
-     *
      * @return The {@link Address}.
      */
     public Address getAddress() {
@@ -157,7 +144,6 @@ public class Home {
 
     /**
      * Sets the address for the home.
-     *
      * @param address The {@link Address} to assign.
      */
     public void setAddress(Address address) {
@@ -166,7 +152,6 @@ public class Home {
 
     /**
      * Gets the dwelling type of the home (e.g., standalone, bungalow).
-     *
      * @return The dwelling type.
      */
     public DwellingType getTypeOfDwelling() {
@@ -175,7 +160,6 @@ public class Home {
 
     /**
      * Sets the type of dwelling for the home.
-     *
      * @param typeOfDwelling The dwelling type enum.
      */
     public void setTypeOfDwelling(DwellingType typeOfDwelling) {

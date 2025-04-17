@@ -6,6 +6,11 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
+
+/**
+ * Represents a customer in the insurance system.
+ * Contains basic personal and contact details including address and authentication credentials.
+ */
 @Entity
 public class Customer {
 
@@ -20,12 +25,6 @@ public class Customer {
     private String username;
     @JsonIgnore //hides from json / removable if necessary
     private String password;
-
-    /**
-     * Represents a customer in the insurance system.
-     * <p>
-     * Contains basic personal and contact details including address and authentication credentials.
-     */
     @ManyToOne
     @JoinColumn(name = "address_id")
     private Address address;

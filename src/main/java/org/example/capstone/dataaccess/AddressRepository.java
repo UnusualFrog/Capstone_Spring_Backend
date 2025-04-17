@@ -7,16 +7,13 @@ import java.util.Optional;
 
 /**
  * Repository interface for managing {@link Address} entities.
- * <p>
  * Provides basic CRUD operations and custom queries using Spring Data.
  */
 public interface AddressRepository extends CrudRepository<Address, Long> {
 
     /**
      * Retrieves all addresses by their unique ID.
-     * <p>
      * Note: This method is likely redundant, as {@code findById(Long id)} is already provided by {@link CrudRepository}.
-     *
      * @param id The ID of the address.
      * @return An iterable collection containing the address, if found.
      */
@@ -24,7 +21,6 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
 
     /**
      * Checks if an address exists by matching all address components.
-     *
      * @param unit        The unit number of the address.
      * @param street      The street name.
      * @param city        The city.
@@ -36,7 +32,6 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
 
     /**
      * Retrieves an address by matching all components of the address.
-     *
      * @param unit        The unit number of the address.
      * @param street      The street name.
      * @param city        The city.
