@@ -681,7 +681,7 @@ public class MainController {
     public @ResponseBody ResponseEntity<Map<String, Object>> getAddressById(@PathVariable("id") Long addressId) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "Address with ID "+ addressId +" retrieved!");
+        response.put("message", "Address with ID " + addressId + " retrieved!");
         response.put("object", addressRepository.findById(addressId));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -693,6 +693,16 @@ public class MainController {
             @RequestParam String city,
             @RequestParam String province,
             @RequestParam String postalCode) {
+        Map<String, Object> response = new HashMap<>();
+        if (addressRepository.existsByUnitAndStreetAndCityAndProvinceAndPostalCode(unit, street, city, province, postalCode)) {
+            Optional<Address> addressOptional = addressRepository.getAddressByUnitAndStreetAndCityAndProvinceAndPostalCode(unit, street, city, province, postalCode);
+            if(addressOptional.isPresent()) {
+                response.put("success", true);
+                response.put("message", "Address exists already, returned address with ID "+ addressOptional.get().getId() +" successfully!");
+                response.put("object", addressOptional.get());
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+        }
         Address address = new Address();
         address.setUnit(unit);
         address.setStreet(street);
@@ -700,7 +710,6 @@ public class MainController {
         address.setProvince(province);
         address.setPostalCode(postalCode);
         addressRepository.save(address);
-        Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", "Address created successfully!");
         response.put("object", address);
