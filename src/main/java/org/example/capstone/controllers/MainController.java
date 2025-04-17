@@ -45,9 +45,7 @@ public class MainController {
 
     private final DecimalFormat decimalFormatter = new DecimalFormat("#.##");
 
-    /* *
-     *  CUSTOMER METHODS
-     * */
+    /* ******************************************** CUSTOMER METHODS ********************************************** */
 
     /**
      * Retrieves all customers from the database.
@@ -79,6 +77,13 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves customers by their first and last name.
+     *
+     * @param firstName The first name of the customer.
+     * @param lastName  The last name of the customer.
+     * @return A list of customers with the specified name.
+     */
     @GetMapping(path = RESTNouns.CUSTOMER + RESTNouns.NAME)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllCustomersUsingName(
             @RequestParam String firstName,
@@ -90,6 +95,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves customers by their email.
+     *
+     * @param email The email address to search.
+     * @return A list of customers with the provided email.
+     */
     @GetMapping(path = RESTNouns.CUSTOMER + RESTNouns.EMAIL)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllCustomersUsingEmail(
             @RequestParam String email) {
@@ -101,13 +112,16 @@ public class MainController {
     }
 
     /**
-     * Registers a new customer account. The password is securely hashed before being saved.
+     * Registers a new customer account. Requires a valid address ID.
      *
-     * @param birthday       The customer's birthday.
-     * @param email          The customer's email address.
-     * @param username       The desired username for the customer account.
-     * @param password       The plain-text password to be hashed and stored.
-     * @return A JSON response indicating success or failure.
+     * @param firstName The first name of the customer.
+     * @param lastName  The last name of the customer.
+     * @param birthday  The birthday of the customer.
+     * @param email     The email address of the customer.
+     * @param username  The chosen username for the account.
+     * @param password  The plain-text password.
+     * @param addressId The ID of the address to assign.
+     * @return A ResponseEntity with success or conflict if username is taken.
      */
     @PostMapping(path = RESTNouns.CUSTOMER + RESTNouns.REGISTER)
     public ResponseEntity<Map<String, Object>> createCustomer(
@@ -144,11 +158,11 @@ public class MainController {
     }
 
     /**
-     * Authenticates a customer login by verifying the provided credentials against the stored encrypted password.
+     * Authenticates a customer login by verifying username and password.
      *
-     * @param username The customer's username.
-     * @param password The plain-text password to validate.
-     * @return A JSON response indicating login success or failure.
+     * @param username The login username.
+     * @param password The plain-text password.
+     * @return A ResponseEntity indicating success or unauthorized.
      */
     @PostMapping(path = RESTNouns.CUSTOMER + RESTNouns.LOGIN)
     public ResponseEntity<Map<String, Object>> loginCustomer(
@@ -170,10 +184,15 @@ public class MainController {
     }
 
     /**
-     * Updates an existing customer's information.
+     * Updates a customer's basic info and address.
      *
-     * @param customerId The unique identifier of the user to update
-     * @return A string message indicating the result of the update operation
+     * @param customerId The ID of the customer to update.
+     * @param firstName  The new first name.
+     * @param lastName   The new last name.
+     * @param birthday   The new birthday.
+     * @param email      The new email.
+     * @param addressId  The new address ID.
+     * @return A ResponseEntity indicating success or not found.
      */
     @PutMapping(path = RESTNouns.CUSTOMER + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> updateCustomerById(
@@ -209,6 +228,14 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Allows a customer to reset their password securely.
+     *
+     * @param customerId  The ID of the customer.
+     * @param oldPassword The current password.
+     * @param newPassword The new password.
+     * @return A ResponseEntity indicating result of password update.
+     */
     @PutMapping(path = RESTNouns.CUSTOMER + RESTNouns.RESET + RESTNouns.ID)
     public ResponseEntity<Map<String, Object>> resetCustomerPasswordById(
             @PathVariable("id") Long customerId,
@@ -256,14 +283,12 @@ public class MainController {
         }
     }
 
-    /* *
-     *  EMPLOYEE METHODS
-     * */
+    /* ******************************************** EMPLOYEE METHODS *********************************************** */
 
     /**
-     * Retrieves all customers from the database.
+     * Retrieves all employees in the system.
      *
-     * @return An iterable collection of all User entities
+     * @return A ResponseEntity containing all employees and a success message.
      */
     @GetMapping(path = RESTNouns.EMPLOYEE)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllEmployees() {
@@ -274,6 +299,13 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Authenticates an employee login using username and password.
+     *
+     * @param username The employee's username.
+     * @param password The plain-text password.
+     * @return A ResponseEntity indicating login success or failure.
+     */
     @PostMapping(path = RESTNouns.EMPLOYEE + RESTNouns.LOGIN)
     public ResponseEntity<Map<String, Object>> loginEmployee(
             @RequestParam String username,
@@ -293,10 +325,12 @@ public class MainController {
     }
 
     /**
-     * Updates an existing customer's information.
+     * Updates an employee's first and last name by their ID.
      *
-     * @param employeeId The unique identifier of the user to update
-     * @return A string message indicating the result of the update operation
+     * @param employeeId The ID of the employee to update.
+     * @param firstName  The updated first name.
+     * @param lastName   The updated last name.
+     * @return A ResponseEntity indicating success or failure.
      */
     @PutMapping(path = RESTNouns.EMPLOYEE + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> updateEmployeeNameById(
@@ -322,10 +356,17 @@ public class MainController {
     }
 
     /**
-     * Updates an existing customer's information.
+     * Allows an employee to update a customer’s profile details by customer ID.
      *
-     * @param customerId The unique identifier of the user to update
-     * @return A string message indicating the result of the update operation
+     * @param customerId The ID of the customer.
+     * @param firstName  The updated first name.
+     * @param lastName   The updated last name.
+     * @param birthday   The updated birthday.
+     * @param email      The updated email.
+     * @param addressId  The updated address ID.
+     * @param username   The updated username.
+     * @param password   The new plain-text password to be encrypted.
+     * @return A ResponseEntity indicating update result.
      */
     @PutMapping(path = RESTNouns.EMPLOYEE + RESTNouns.CUSTOMER + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> employeeUpdateCustomerById(
@@ -361,6 +402,14 @@ public class MainController {
         }
     }
 
+    /**
+     * Allows an employee to securely reset their password using their old password.
+     *
+     * @param employeeId  The ID of the employee.
+     * @param oldPassword The current password for verification.
+     * @param newPassword The new password to be encrypted and saved.
+     * @return A ResponseEntity indicating success or unauthorized if the password is incorrect.
+     */
     @PutMapping(path = RESTNouns.EMPLOYEE + RESTNouns.RESET + RESTNouns.ID)
     public ResponseEntity<Map<String, Object>> resetEmployeePasswordById(
             @PathVariable("id") Long employeeId,
@@ -387,10 +436,13 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    /* *
-     *  ADMIN METHODS
-     * */
+    /* ********************************************** ADMIN METHODS *********************************************** */
 
+    /**
+     * Retrieves the current risk factors configuration.
+     *
+     * @return A ResponseEntity containing all risk factor values used in premium calculations.
+     */
     @GetMapping(path = RESTNouns.ADMIN + RESTNouns.RISK)
     public @ResponseBody ResponseEntity<Map<String, Object>> adminGetRiskFactors() {
         Map<String, Object> response = new HashMap<>();
@@ -401,12 +453,14 @@ public class MainController {
     }
 
     /**
-     * Registers a new employee account. The password is securely hashed before being saved.
+     * Registers a new employee in the system. Username must be unique.
      *
-     * @param email          The customer's email address.
-     * @param username       The desired username for the employee account.
-     * @param password       The plain-text password to be hashed and stored.
-     * @return A JSON response indicating success or failure.
+     * @param firstName The employee's first name.
+     * @param lastName  The employee's last name.
+     * @param email     The employee's email address.
+     * @param username  The employee's username.
+     * @param password  The plain-text password to be encrypted.
+     * @return A ResponseEntity indicating success or conflict if username exists.
      */
     @PostMapping(path = RESTNouns.ADMIN + RESTNouns.REGISTER)
     public ResponseEntity<Map<String, Object>> adminCreateEmployee(
@@ -438,10 +492,15 @@ public class MainController {
     }
 
     /**
-     * Updates an existing customer's information.
+     * Updates employee information by admin.
      *
-     * @param employeeId The unique identifier of the user to update
-     * @return A string message indicating the result of the update operation
+     * @param employeeId The ID of the employee to update.
+     * @param firstName  The updated first name.
+     * @param lastName   The updated last name.
+     * @param email      The updated email address.
+     * @param username   The updated username.
+     * @param password   The new password (to be encrypted).
+     * @return A ResponseEntity indicating update success or failure.
      */
     @PutMapping(path = RESTNouns.ADMIN + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> adminUpdateEmployeeById(
@@ -472,6 +531,13 @@ public class MainController {
         }
     }
 
+    /**
+     * Updates risk factors used in quote and policy premium calculations.
+     * Also writes the updated configuration to an XML file using XStream.
+     *
+     * @param rf The updated RiskFactors object.
+     * @return A ResponseEntity indicating success or failure of the update operation.
+     */
     @PutMapping(path = RESTNouns.ADMIN + RESTNouns.RISK)
     public @ResponseBody ResponseEntity<Map<String, Object>> adminUpdateRiskFactors(@RequestBody RiskFactors rf) {
         Map<String, Object> response = new HashMap<>();
@@ -517,10 +583,13 @@ public class MainController {
         }
     }
 
-    /* *
-     *  HOME METHODS
-     * */
+    /* ********************************************* HOME METHODS ************************************************* */
 
+    /**
+     * Retrieves all homes stored in the system.
+     *
+     * @return A ResponseEntity containing a list of all homes.
+     */
     @GetMapping(path = RESTNouns.HOME)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomes() {
         Map<String, Object> response = new HashMap<>();
@@ -533,8 +602,8 @@ public class MainController {
     /**
      * Retrieves all homes associated with a specific customer.
      *
-     * @param customerId The unique identifier of the customer whose homes are to be retrieved
-     * @return An iterable collection of Home entities belonging to the specified customer
+     * @param customerId The ID of the customer.
+     * @return A ResponseEntity containing the list of homes or a not found error.
      */
 
     @GetMapping(path = RESTNouns.HOME +  RESTNouns.ID)
@@ -544,7 +613,7 @@ public class MainController {
             Optional<Customer> customer = customerRepository.findById(customerId);
             if(customer.isPresent()){
                 response.put("success", true);
-                response.put("message", "All homes of customer ID "+ customerId +" retrieved!");
+                response.put("message", "All homes of customer ID " + customerId + " retrieved!");
                 response.put("object", homeRepository.getAllHomesByCustomer(customer.get()));
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
@@ -555,12 +624,16 @@ public class MainController {
     }
 
     /**
-     * Creates a new home for a specific customer.
+     * Creates a new home linked to a customer and an address.
      *
-     * @param customerId The unique identifier of the user for whom the home is being created
-     * @param dateBuilt The date when the home was built
-     * @param homeValue The monetary value of the home
-     * @return The newly created Home entity, or null if the user does not exist
+     * @param addressId     The ID of the address.
+     * @param customerId    The ID of the customer.
+     * @param dateBuilt     The date the home was built.
+     * @param homeValue     The value of the home.
+     * @param heatingType   The type of heating.
+     * @param location      The home's location (urban/rural).
+     * @param dwellingType  The dwelling type.
+     * @return A ResponseEntity with the created Home or error if customer not found.
      */
     @PostMapping(path = RESTNouns.HOME + RESTNouns.ID + RESTNouns.ADDITIONAL_ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> createHomeByAddressAndCustomerIds(
@@ -597,12 +670,17 @@ public class MainController {
     }
 
     /**
-     * Updates an existing home associated with a specific customer.
+     * Updates an existing home's information.
      *
-     * @param homeId The unique identifier of the home to be updated
-     * @param dateBuilt The new date when the home was built
-     * @param homeValue The new monetary value of the home
-     * @return A string message indicating the result of the update operation
+     * @param homeId        The ID of the home to update.
+     * @param dateBuilt     The updated date built.
+     * @param homeValue     The updated home value.
+     * @param heatingType   The updated heating type.
+     * @param location      The updated location.
+     * @param dwellingType  The updated dwelling type.
+     * @param customerId    The ID of the new/updated customer.
+     * @param addressId     The ID of the new/updated address.
+     * @return A ResponseEntity indicating update result.
      */
     @PutMapping(path =  RESTNouns.HOME + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> updateHomeById(
@@ -664,10 +742,13 @@ public class MainController {
         }
     }
 
-    /* *
-    *   ADDRESS METHODS
-    * */
+    /* ******************************************** ADDRESS METHODS ************************************************ */
 
+    /**
+     * Retrieves all addresses stored in the system.
+     *
+     * @return A ResponseEntity containing all addresses.
+     */
     @GetMapping(path = RESTNouns.ADDRESS)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllAddresses() {
         Map<String, Object> response = new HashMap<>();
@@ -677,6 +758,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves an address by its ID.
+     *
+     * @param addressId The ID of the address to retrieve.
+     * @return A ResponseEntity containing the address or a not found error.
+     */
     @GetMapping(path = RESTNouns.ADDRESS + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAddressById(@PathVariable("id") Long addressId) {
         Map<String, Object> response = new HashMap<>();
@@ -686,6 +773,16 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Creates a new address or returns an existing one if duplicate found.
+     *
+     * @param unit        The unit number.
+     * @param street      The street name.
+     * @param city        The city name.
+     * @param province    The province.
+     * @param postalCode  The postal code.
+     * @return A ResponseEntity with the created or found Address object.
+     */
     @PostMapping(path = RESTNouns.ADDRESS)
     public @ResponseBody ResponseEntity<Map<String, Object>> createAddress(
             @RequestParam Integer unit,
@@ -698,7 +795,7 @@ public class MainController {
             Optional<Address> addressOptional = addressRepository.getAddressByUnitAndStreetAndCityAndProvinceAndPostalCode(unit, street, city, province, postalCode);
             if(addressOptional.isPresent()) {
                 response.put("success", true);
-                response.put("message", "Address exists already, returned address with ID "+ addressOptional.get().getId() +" successfully!");
+                response.put("message", "Address exists already, returned address with ID " + addressOptional.get().getId() + " successfully!");
                 response.put("object", addressOptional.get());
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
@@ -716,6 +813,17 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    /**
+     * Updates an address by its ID.
+     *
+     * @param addressId   The ID of the address to update.
+     * @param unit        The new unit number.
+     * @param street      The new street name.
+     * @param city        The new city.
+     * @param province    The new province.
+     * @param postalCode  The new postal code.
+     * @return A ResponseEntity indicating success or not found.
+     */
     @PutMapping(path = RESTNouns.ADDRESS + RESTNouns.ID)
         public @ResponseBody ResponseEntity<Map<String, Object>> updateAddressById(
                 @PathVariable("id") Long addressId,
@@ -745,6 +853,12 @@ public class MainController {
             }
         }
 
+    /**
+     * Deletes an address by its ID.
+     *
+     * @param addressId The ID of the address to delete.
+     * @return A ResponseEntity indicating success or not found.
+     */
     @DeleteMapping(path = RESTNouns.ADDRESS + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> deleteAddressById(
             @PathVariable("id") Long addressId) {
@@ -761,10 +875,13 @@ public class MainController {
         }
     }
 
-    /* *
-     *  AUTO METHODS
-     * */
+    /* ************************************************ AUTO METHODS *********************************************** */
 
+    /**
+     * Retrieves all autos stored in the system.
+     *
+     * @return A ResponseEntity containing all auto records.
+     */
     @GetMapping(path = RESTNouns.AUTO)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllAutos() {
         Map<String, Object> response = new HashMap<>();
@@ -800,12 +917,14 @@ public class MainController {
     }
 
     /**
-     * Creates a new auto object for a specific user.
+     * Creates a new auto record linked to a customer.
      *
-     * @param customerId The unique identifier of the user for whom the auto is being created
-     * @return The newly created Auto entity, or null if the user does not exist
+     * @param customerId The ID of the customer.
+     * @param make       The vehicle make (e.g., Toyota).
+     * @param model      The vehicle model (e.g., Corolla).
+     * @param year       The vehicle year.
+     * @return A ResponseEntity indicating creation result.
      */
-
     @PostMapping(path = RESTNouns.AUTO + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> createAutoByCustomerID(
             @PathVariable("id") Long customerId,
@@ -834,10 +953,13 @@ public class MainController {
     }
 
     /**
-     * Updates an existing auto object associated with a specific user.
+     * Updates an auto record by its ID.
      *
-     * @param autoId The unique identifier of the auto to be updated
-     * @return A string message indicating the result of the update operation
+     * @param autoId The ID of the auto to update.
+     * @param make   The updated make.
+     * @param model  The updated model.
+     * @param year   The updated year.
+     * @return A ResponseEntity indicating update success or failure.
      */
 
     @PutMapping(path = RESTNouns.AUTO + RESTNouns.ID)
@@ -885,9 +1007,13 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    /* *
-     *  ACCIDENTS METHODS
-     * */
+    /* *********************************************** ACCIDENT METHODS ******************************************** */
+
+    /**
+     * Retrieves all accident records in the system.
+     *
+     * @return A ResponseEntity containing all accidents.
+     */
     @GetMapping(path = RESTNouns.ACCIDENT)
         public @ResponseBody ResponseEntity<Map<String, Object>> getAllAccidents() {
         Map<String, Object> response = new HashMap<>();
@@ -897,6 +1023,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
+    /**
+     * Retrieves a specific accident by its ID.
+     *
+     * @param accidentID The ID of the accident to retrieve.
+     * @return A ResponseEntity containing the accident or not found message.
+     */
     @GetMapping(path = RESTNouns.ACCIDENT + RESTNouns.ID)
         public @ResponseBody ResponseEntity<Map<String, Object>> getAccidentById(@PathVariable("id") Long accidentID) {
         Map<String, Object> response = new HashMap<>();
@@ -906,6 +1038,13 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
+    /**
+     * Creates a new accident record for a specific customer.
+     *
+     * @param customerId     The ID of the customer involved.
+     * @param dateOfAccident The date the accident occurred.
+     * @return A ResponseEntity indicating success or not found if customer is missing.
+     */
     @PostMapping(path = RESTNouns.ACCIDENT + RESTNouns.ID)
         public @ResponseBody ResponseEntity<Map<String, Object>> createAccidentByCustomerId(
                 @PathVariable("id") Long customerId,
@@ -929,6 +1068,13 @@ public class MainController {
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
 
+    /**
+     * Updates the date of an existing accident.
+     *
+     * @param accidentId     The ID of the accident to update.
+     * @param dateOfAccident The new date of the accident.
+     * @return A ResponseEntity indicating update success or failure.
+     */
     @PutMapping(path = RESTNouns.ACCIDENT + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> updateAccidentById(
             @PathVariable("id") Long accidentId,
@@ -949,6 +1095,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Deletes an accident record by its ID.
+     *
+     * @param accidentId The ID of the accident to delete.
+     * @return A ResponseEntity indicating success or failure of the deletion.
+     */
     @DeleteMapping(path = RESTNouns.ACCIDENT + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> deleteAccidentById(
             @PathVariable("id") Long accidentId) {
@@ -964,14 +1116,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    /* *
-     *  HOME QUOTE METHODS
-     * */
+    /* ******************************************* HOME QUOTE METHODS ********************************************** */
 
     /**
-     * Retrieves all home quotes from the database.
+     * Retrieves all home insurance quotes.
      *
-     * @return An iterable collection of all HomeQuote entities
+     * @return A ResponseEntity containing all home quotes.
      */
     @GetMapping(path = RESTNouns.HOME_QUOTE)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomeQuotes() {
@@ -982,6 +1132,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves a home quote by its ID.
+     *
+     * @param quoteID The ID of the home quote.
+     * @return A ResponseEntity containing the quote or a not found message.
+     */
     @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getHomeQuoteById(@PathVariable("id") Long quoteID) {
         Map<String, Object> response = new HashMap<>();
@@ -991,6 +1147,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves all home quotes for a specific customer.
+     *
+     * @param customerID The customer's ID.
+     * @return A ResponseEntity containing the list of quotes.
+     */
     @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.CUSTOMER + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomeQuotesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
@@ -1000,6 +1162,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves only active home quotes for a customer.
+     *
+     * @param customerID The customer's ID.
+     * @return A ResponseEntity containing the list of active quotes.
+     */
     @GetMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ACTIVE + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllActiveHomeQuotesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
@@ -1009,6 +1177,15 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Creates a new home insurance quote based on customer and home information.
+     *
+     * @param customerId    The ID of the customer.
+     * @param homeId        The ID of the home.
+     * @param liability     The liability limit (e.g., 1000000 or 2000000).
+     * @param packagedQuote True if bundled with an auto policy.
+     * @return A ResponseEntity containing the generated quote or error message.
+     */
     @PostMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ID + RESTNouns.ADDITIONAL_ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> createHomeQuoteByCustomerAndHomeId(
             @PathVariable("id") Long customerId,
@@ -1086,6 +1263,13 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Sets the active status of a home quote.
+     *
+     * @param quoteId      The ID of the home quote.
+     * @param activeStatus True to activate, false to deactivate.
+     * @return A ResponseEntity indicating the result of the update.
+     */
     @PutMapping(path = RESTNouns.HOME_QUOTE + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> updateHomeQuoteById(
             @PathVariable("id") Long quoteId,
@@ -1107,14 +1291,12 @@ public class MainController {
     }
 
 
-    /* *
-     *  AUTO QUOTE METHODS
-     * */
+    /* ******************************************* AUTO QUOTE METHODS ********************************************** */
 
     /**
-     * Retrieves all auto quotes from the database.
+     * Retrieves all auto insurance quotes in the system.
      *
-     * @return An iterable collection of all AutoQuote entities
+     * @return A ResponseEntity containing a list of all auto quotes.
      */
     @GetMapping(path = RESTNouns.AUTO_QUOTE)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllAutoQuotes() {
@@ -1125,6 +1307,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves a specific auto quote by ID.
+     *
+     * @param quoteID The ID of the quote.
+     * @return A ResponseEntity containing the quote or a not found message.
+     */
     @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAutoQuoteById(@PathVariable("id") Long quoteID) {
         Map<String, Object> response = new HashMap<>();
@@ -1134,6 +1322,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves all auto quotes for a specific customer.
+     *
+     * @param customerID The ID of the customer.
+     * @return A ResponseEntity with the list of quotes.
+     */
     @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.CUSTOMER + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllAutoQuotesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
@@ -1143,6 +1337,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves all active auto quotes for a specific customer.
+     *
+     * @param customerID The ID of the customer.
+     * @return A ResponseEntity with the list of active quotes.
+     */
     @GetMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ACTIVE + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllActiveAutoQuotesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
@@ -1152,6 +1352,14 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Creates a new auto insurance quote for a customer and vehicle.
+     *
+     * @param customerId    The ID of the customer.
+     * @param autoId        The ID of the vehicle.
+     * @param packagedQuote True if the customer is bundling with a home policy.
+     * @return A ResponseEntity containing the created quote or error details.
+     */
     @PostMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ID + RESTNouns.ADDITIONAL_ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> createAutoQuoteByCustomerAndAutoId(
             @PathVariable("id") Long customerId,
@@ -1224,6 +1432,13 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Updates the active status of an auto quote.
+     *
+     * @param quoteId      The ID of the auto quote.
+     * @param activeStatus True to activate, false to deactivate.
+     * @return A ResponseEntity indicating success or failure.
+     */
     @PutMapping(path = RESTNouns.AUTO_QUOTE + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> updateAutoQuoteById(
             @PathVariable("id") Long quoteId,
@@ -1245,14 +1460,12 @@ public class MainController {
     }
 
 
-    /* *
-     *  HOME POLICY METHODS
-     * */
+    /* *********************************************** HOME POLICY METHODS ***************************************** */
 
     /**
-     * Retrieves all home policies from the database.
+     * Retrieves all home insurance policies in the system.
      *
-     * @return An iterable collection of all HomePolicy entities
+     * @return A ResponseEntity containing all home policies.
      */
     @GetMapping(path = RESTNouns.HOME_POLICY)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomePolicies() {
@@ -1263,6 +1476,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves a specific home policy by its ID.
+     *
+     * @param policyId The ID of the home policy.
+     * @return A ResponseEntity containing the policy or not found message.
+     */
     @GetMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getHomePolicyById(@PathVariable("id") Long policyId) {
         Map<String, Object> response = new HashMap<>();
@@ -1272,6 +1491,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves all home policies for a specific customer.
+     *
+     * @param customerID The customer's ID.
+     * @return A ResponseEntity containing the list of policies.
+     */
     @GetMapping(path = RESTNouns.HOME_POLICY + RESTNouns.CUSTOMER + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllHomePoliciesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
@@ -1281,6 +1506,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves only active home policies for a customer.
+     *
+     * @param customerID The customer's ID.
+     * @return A ResponseEntity containing active home policies.
+     */
     @GetMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ACTIVE + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllActiveHomePoliciesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
@@ -1290,6 +1521,13 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Creates a new home insurance policy based on an existing quote.
+     *
+     * @param quoteId       The ID of the home quote.
+     * @param effectiveDate The start date of the policy.
+     * @return A ResponseEntity indicating success or not found.
+     */
     @PostMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> createHomePolicyByHomeQuoteId(
             @PathVariable("id") Long quoteId,
@@ -1320,6 +1558,14 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Updates the end date and active status of a home policy.
+     *
+     * @param policyId   The ID of the policy.
+     * @param activeStatus True to activate, false to deactivate.
+     * @param endDate    The updated end date.
+     * @return A ResponseEntity indicating success or failure.
+     */
     @PutMapping(path = RESTNouns.HOME_POLICY + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> updateHomePolicyById(
             @PathVariable("id") Long policyId,
@@ -1343,14 +1589,12 @@ public class MainController {
     }
 
 
-    /* *
-     *  AUTO POLICY METHODS
-     * */
+    /* ***************************************** AUTO POLICY METHODS ********************************************** */
 
     /**
-     * Retrieves all auto policies from the database.
+     * Retrieves all auto insurance policies.
      *
-     * @return An iterable collection of all AutoPolicy entities
+     * @return A ResponseEntity containing all auto policies.
      */
     @GetMapping(path = RESTNouns.AUTO_POLICY)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllAutoPolicies() {
@@ -1361,6 +1605,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves a specific auto policy by ID.
+     *
+     * @param policyId The ID of the auto policy.
+     * @return A ResponseEntity containing the policy or not found message.
+     */
     @GetMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAutoPolicyById(@PathVariable("id") Long policyId) {
         Map<String, Object> response = new HashMap<>();
@@ -1370,6 +1620,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves all auto policies for a customer.
+     *
+     * @param customerID The ID of the customer.
+     * @return A ResponseEntity containing the customer's auto policies.
+     */
     @GetMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.CUSTOMER + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllAutoPoliciesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
@@ -1379,6 +1635,12 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves all active auto policies for a customer.
+     *
+     * @param customerID The ID of the customer.
+     * @return A ResponseEntity containing only active policies.
+     */
     @GetMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.ACTIVE + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> getAllActiveAutoPoliciesByCustomerId(@PathVariable("id") Long customerID) {
         Map<String, Object> response = new HashMap<>();
@@ -1388,6 +1650,13 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Creates a new auto insurance policy based on an existing auto quote.
+     *
+     * @param quoteId       The ID of the auto quote.
+     * @param effectiveDate The start date of the policy.
+     * @return A ResponseEntity with the created policy or not found error.
+     */
     @PostMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> createAutoPolicyByAutoQuote(
             @PathVariable("id") Long quoteId,
@@ -1417,6 +1686,14 @@ public class MainController {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Updates an auto policy's active status and end date.
+     *
+     * @param policyId     The ID of the policy to update.
+     * @param activeStatus True to activate, false to deactivate.
+     * @param endDate      The updated end date.
+     * @return A ResponseEntity indicating update success or not found.
+     */
     @PutMapping(path = RESTNouns.AUTO_POLICY + RESTNouns.ID)
     public @ResponseBody ResponseEntity<Map<String, Object>> updateAutoPolicyByCustomer(
             @PathVariable("id") Long policyId,

@@ -7,8 +7,24 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.*;
 
+/**
+ * Configuration class responsible for loading or initializing the {@link RiskFactors} bean.
+ * <p>
+ * This class attempts to read risk factor settings from an XML config file on startup. If the file doesn't exist,
+ * it creates one with default values and saves it to disk using XStream serialization.
+ */
 @Configuration
 public class RiskFactorConfig {
+
+    /**
+     * Initializes and returns the {@link RiskFactors} bean.
+     * <ul>
+     *     <li>If the config file exists: it loads and parses it using XStream.</li>
+     *     <li>If the config file does not exist: it creates a new one with default values and persists it.</li>
+     * </ul>
+     *
+     * @return A {@link RiskFactors} instance populated from XML or default values.
+     */
     @Bean
     public RiskFactors riskFactor() {
         RiskFactors riskFactors = new RiskFactors();

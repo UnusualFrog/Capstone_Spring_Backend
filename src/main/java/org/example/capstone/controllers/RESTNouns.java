@@ -1,8 +1,10 @@
 package org.example.capstone.controllers;
 
 /**
- * Store the API Path and REST Nouns as constants to make the REST Controller more robust
- *
+ * Defines constants used throughout the REST API for routing and path consistency.
+ * <p>
+ * This class centralizes all endpoint path segments to reduce duplication,
+ * improve readability, and support consistent naming across controllers.
  */
 public class RESTNouns {
 
