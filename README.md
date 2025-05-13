@@ -7,6 +7,8 @@ Built with Intellij using Java and Spring
 
 Connects with the following frontend to manage administration as well as creation, storage and management of user policies, quotes, vehicles and homes.
 
+Frontend: https://github.com/UnusualFrog/Taylor_Insurance_NextJS_Frontend
+
 
 ## Setup
 
